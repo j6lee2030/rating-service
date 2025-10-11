@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Subjects - CI Rating Service</title>
-    <link rel="stylesheet" href="../static/styles.css">
     <style>
         body {
             font-family: 'Didact Gothic', sans-serif;
@@ -245,16 +244,24 @@
         <div class="loader"></div>
     </div>
 
-    <a href="/" class="back-button">← Back to Home</a>
+    <a href="index.html" class="back-button">← Back to Home</a>
 
     <div class="main-box">
         <div class="custom-dropdown">
             <div class="dropdown-select">Click the subject</div>
             <div class="dropdown-list">
-                {% set subjects = ["Math", "Science", "English and Literature", "Individuals and Societies", "Design", "Chinese", "Korean", "Spanish", "Strings", "Piano & Guitar", "Vocal music", "Media Arts"] %}
-                {% for subject in subjects %}
-                    <div data-value="{{ subject }}">{{ subject }}</div>
-                {% endfor %}
+                <div data-value="Math">Math</div>
+                <div data-value="Science">Science</div>
+                <div data-value="English and Literature">English and Literature</div>
+                <div data-value="Individuals and Societies">Individuals and Societies</div>
+                <div data-value="Design">Design</div>
+                <div data-value="Chinese">Chinese</div>
+                <div data-value="Korean">Korean</div>
+                <div data-value="Spanish">Spanish</div>
+                <div data-value="Strings">Strings</div>
+                <div data-value="Piano & Guitar">Piano & Guitar</div>
+                <div data-value="Vocal music">Vocal music</div>
+                <div data-value="Media Arts">Media Arts</div>
             </div>
         </div>
 
