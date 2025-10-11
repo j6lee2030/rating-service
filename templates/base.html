@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CI Rating Service</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Crimson+Text&family=Didact+Gothic&display=swap');
+
+        body {
+            font-family: 'Didact Gothic', sans-serif; 
+            margin: 0;
+            padding: 0;
+            color: #333;
+            background-image: url('{{ url_for('static', filename='bg.jpg') }}');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('{{ url_for('static', filename='bg.jpg') }}');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            filter: blur(5px);
+            z-index: -1;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            background-color: rgba(255, 255, 255, 0.8);
+            border-bottom: 1px solid #ddd;
+            position: relative;
+            z-index: 1;
+        }
+        .header .logo {
+            height: 50px;
+        }
+        .header-menu {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .header-menu a, .header-menu button {
+            text-decoration: none;
+            color: navy;
+            font-weight: bold;
+            padding: 8px 15px;
+            border-radius: 5px;
+            background-color: rgba(255, 255, 255, 0.7);
+            border: 1px solid navy;
+            transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
+            font-family: 'Didact Gothic', sans-serif;
+            font-size: 1em;
+            cursor: pointer;
+        }
+
+        .header-menu a:hover, .header-menu button:hover {
+            color: #002244;
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .main-content {
+            text-align: center;
+            padding: 50px 20px;
+            max-width: 800px;
+            margin: 20px auto;
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            position: relative;
+            z-index: 1;
+        }
+        
+        .welcome-title {
+            font-family: 'Crimson Text', serif;
+            font-weight: normal;
+            font-size: 2.5em;
+            color: navy;
+        }
+
+        .item-list h2 {
+            font-family: 'Crimson Text', serif;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <img src="{{ url_for('static', filename='logo.jpg') }}" alt="CI Logo" class="logo">
+        <nav class="header-menu">
+            <a href="/subjects">Subjects</a>
+            <button id="menu-btn">Menu</button>
+        </nav>
+    </header>
+
+    <div class="main-content">
+        {% block content %}{% endblock %}
+    </div>
+
+    {% include 'menu.html' %}
+
+</body>
+</html>

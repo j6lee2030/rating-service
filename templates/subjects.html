@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subjects - CI Rating Service</title>
+    <link rel="stylesheet" href="../static/styles.css">
+    <style>
+        body {
+            font-family: 'Didact Gothic', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            position: relative;
+        }
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('../static/subjects.jpg');
+            background-size: cover;
+            background-position: center;
+            filter: blur(5px);
+            z-index: -1;
+        }
+        .main-box {
+            width: 100%;
+            max-width: 600px;
+            height: 680px;
+            background-color: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(2px);
+            border: 2px solid #ccc;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 30px;
+            box-sizing: border-box;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .custom-dropdown {
+            width: 100%;
+            position: relative;
+            margin-bottom: 20px;
+        }
+        .dropdown-select {
+            width: 100%;
+            padding: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #fff;
+            cursor: pointer;
+            text-align: center;
+            font-size: 1.2em;
+            font-family: 'Crimson Text', serif;
+            box-sizing: border-box;
+            position: relative;
+            font-weight: bold;
+        }
+        .dropdown-select::after {
+            content: '';
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+            border-top: 8px solid #555;
+            transition: transform 0.3s ease;
+        }
+        .dropdown-select.open::after {
+            transform: translateY(-50%) rotate(180deg);
+        }
+        .dropdown-list {
+            width: 100%;
+            max-height: 250px;
+            overflow-y: auto;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #fff;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            z-index: 10;
+            display: none;
+            margin-top: 5px;
+        }
+        .dropdown-list div {
+            padding: 12px 15px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .dropdown-list div:hover {
+            background-color: #f0f0f0;
+        }
+        
+        .rating-content {
+            display: none;
+            width: 100%;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        .rating-system {
+            width: 100%;
+            flex-grow: 1;
+        }
+        .rating-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+        .rating-label {
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #555;
+            text-align: left;
+            flex: 1;
+        }
+        .stars {
+            font-size: 1em;
+            cursor: pointer;
+            display: flex;
+            gap: 2px;
+        }
+        .star {
+            color: gray;
+        }
+        .star.active {
+            color: gold;
+        }
+        
+        .form-bottom {
+            width: 100%;
+        }
+        .reason-box textarea {
+            font-family: 'Didact Gothic', sans-serif;
+            width: 100%;
+            height: 150px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            resize: none;
+            box-sizing: border-box;
+        }
+        .submit-button {
+            font-family: 'Didact Gothic', sans-serif;
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            border: none;
+            border-radius: 5px;
+            background-color: navy;
+            color: white;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .back-button {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            text-decoration: none;
+            color: navy;
+            font-size: 1.2em;
+            font-weight: bold;
+            background-color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+        }
+        .validation-message {
+            color: red;
+            font-size: 0.9em;
+            text-align: center;
+            display: none;
+            margin-top: 5px;
+        }
+        .submitted-message {
+            font-size: 1.2em;
+            color: green;
+            font-weight: bold;
+            text-align: center;
+            display: none;
+        }
+        
+        /* Generic loader styles */
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid navy;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Styles for the loader inside the main box */
+        #submit-loader {
+            width: 40px;
+            height: 40px;
+            margin: 20px auto;
+            display: none; /* Hidden by default */
+        }
+        
+        /* Styles for the full-page loader */
+        .page-loader-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+        .page-loader-overlay .loader {
+            width: 60px;
+            height: 60px;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="page-loader-overlay">
+        <div class="loader"></div>
+    </div>
+
+    <a href="/" class="back-button">← Back to Home</a>
+
+    <div class="main-box">
+        <div class="custom-dropdown">
+            <div class="dropdown-select">Click the subject</div>
+            <div class="dropdown-list">
+                {% set subjects = ["Math", "Science", "English and Literature", "Individuals and Societies", "Design", "Chinese", "Korean", "Spanish", "Strings", "Piano & Guitar", "Vocal music", "Media Arts"] %}
+                {% for subject in subjects %}
+                    <div data-value="{{ subject }}">{{ subject }}</div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div class="rating-content">
+            <div class="rating-system">
+                <div class="rating-row">
+                    <span class="rating-label">Difficulty</span>
+                    <div class="stars" data-rating-type="difficulty">
+                        <span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span>
+                    </div>
+                </div>
+                <div class="rating-row">
+                    <span class="rating-label">Lecture Style</span>
+                    <div class="stars" data-rating-type="lecture_style">
+                        <span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span>
+                    </div>
+                </div>
+                <div class="rating-row">
+                    <span class="rating-label">Engaging level</span>
+                    <div class="stars" data-rating-type="engaging_level">
+                        <span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-bottom">
+                <div class="reason-box">
+                    <p>Reason:</p>
+                    <textarea placeholder="Enter your reason here..."></textarea>
+                    <div class="validation-message">Please type something.</div>
+                </div>
+                <button class="submit-button">Submit answer</button>
+            </div>
+            
+            <!-- ADDED ID HERE -->
+            <div class="loader" id="submit-loader"></div>
+            <div class="submitted-message">Answer submitted</div>
+        </div>
+    </div>
+
+    <script>
+        const dropdownSelect = document.querySelector('.dropdown-select');
+        const dropdownList = document.querySelector('.dropdown-list');
+        const ratingContent = document.querySelector('.rating-content');
+        const submitButton = document.querySelector('.submit-button');
+        const backButton = document.querySelector('.back-button');
+        const pageLoaderOverlay = document.querySelector('.page-loader-overlay');
+
+        backButton.addEventListener('click', (event) => {
+            event.preventDefault();
+            pageLoaderOverlay.style.display = 'flex';
+
+            setTimeout(() => {
+                window.location.href = event.target.href;
+            }, 1000);
+        });
+        
+        dropdownSelect.addEventListener('click', () => {
+            const isVisible = dropdownList.style.display === 'block';
+            dropdownList.style.display = isVisible ? 'none' : 'block';
+            dropdownSelect.classList.toggle('open', !isVisible);
+        });
+
+        dropdownList.addEventListener('click', (event) => {
+            if (event.target.dataset.value) {
+                const selectedSubject = event.target.dataset.value;
+                dropdownSelect.textContent = selectedSubject;
+                dropdownList.style.display = 'none';
+                dropdownSelect.classList.remove('open');
+                ratingContent.style.display = 'flex';
+                
+                document.querySelector('.form-bottom').style.display = 'block';
+                document.querySelector('.submitted-message').style.display = 'none';
+                // Use the new ID to hide the correct loader
+                document.querySelector('#submit-loader').style.display = 'none';
+
+                document.querySelector('.reason-box textarea').value = '';
+                
+                document.querySelectorAll('.star').forEach(star => {
+                    star.classList.remove('active');
+                });
+            }
+        });
+
+        document.addEventListener('click', (event) => {
+            if (!dropdownSelect.contains(event.target)) {
+                dropdownList.style.display = 'none';
+                dropdownSelect.classList.remove('open');
+            }
+        });
+
+        document.querySelectorAll('.stars').forEach(starsContainer => {
+            starsContainer.addEventListener('click', (event) => {
+                if (event.target.classList.contains('star')) {
+                    const stars = starsContainer.querySelectorAll('.star');
+                    const selectedIndex = Array.from(stars).indexOf(event.target);
+                    stars.forEach((star, index) => {
+                        star.classList.toggle('active', index <= selectedIndex);
+                    });
+                }
+            });
+        });
+
+        submitButton.addEventListener('click', () => {
+            const formBottom = document.querySelector('.form-bottom');
+            const validationMessage = document.querySelector('.validation-message');
+            const textarea = document.querySelector('.reason-box textarea');
+            // USE THE NEW ID TO SELECT THE CORRECT LOADER
+            const loader = document.querySelector('#submit-loader');
+            const submittedMessage = document.querySelector('.submitted-message');
+
+            if (textarea.value.trim() === '') {
+                validationMessage.style.display = 'block';
+                setTimeout(() => {
+                    validationMessage.style.display = 'none';
+                }, 2000);
+            } else {
+                validationMessage.style.display = 'none';
+                formBottom.style.display = 'none';
+                loader.style.display = 'block';
+
+                setTimeout(() => {
+                    loader.style.display = 'none';
+                    submittedMessage.style.display = 'block';
+                }, 1000);
+            }
+        });
+    </script>
+</body>
+</html>
