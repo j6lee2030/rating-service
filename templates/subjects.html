@@ -302,7 +302,21 @@
         </div>
     </div>
 
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="../static/db.js"></script>
+    <script src="../static/main.js"></script>
     <script>
+        // Check if user is logged in
+        document.addEventListener('DOMContentLoaded', function() {
+            if (!currentUser) {
+                alert('Please login first');
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            loadUserComments();
+        });
+
         const dropdownSelect = document.querySelector('.dropdown-select');
         const dropdownList = document.querySelector('.dropdown-list');
         const ratingContent = document.querySelector('.rating-content');
@@ -329,13 +343,13 @@
             if (event.target.dataset.value) {
                 const selectedSubject = event.target.dataset.value;
                 dropdownSelect.textContent = selectedSubject;
+                currentSubject = selectedSubject;
                 dropdownList.style.display = 'none';
                 dropdownSelect.classList.remove('open');
                 ratingContent.style.display = 'flex';
                 
                 document.querySelector('.form-bottom').style.display = 'block';
                 document.querySelector('.submitted-message').style.display = 'none';
-                // Use the new ID to hide the correct loader
                 document.querySelector('#submit-loader').style.display = 'none';
 
                 document.querySelector('.reason-box textarea').value = '';
@@ -343,6 +357,10 @@
                 document.querySelectorAll('.star').forEach(star => {
                     star.classList.remove('active');
                 });
+                
+                // Reset editing state
+                editingCommentId = null;
+                submitButton.textContent = 'Submit answer';
             }
         });
 
@@ -365,11 +383,15 @@
             });
         });
 
-        submitButton.addEventListener('click', () => {
+        submitButton.addEventListener('click', async () => {
+            if (!currentSubject) {
+                alert('Please select a subject first');
+                return;
+            }
+
             const formBottom = document.querySelector('.form-bottom');
             const validationMessage = document.querySelector('.validation-message');
             const textarea = document.querySelector('.reason-box textarea');
-            // USE THE NEW ID TO SELECT THE CORRECT LOADER
             const loader = document.querySelector('#submit-loader');
             const submittedMessage = document.querySelector('.submitted-message');
 
@@ -378,17 +400,69 @@
                 setTimeout(() => {
                     validationMessage.style.display = 'none';
                 }, 2000);
-            } else {
-                validationMessage.style.display = 'none';
-                formBottom.style.display = 'none';
-                loader.style.display = 'block';
+                return;
+            }
 
+            // Get ratings
+            const difficulty = getRating('difficulty');
+            const lectureStyle = getRating('lecture_style');
+            const engagingLevel = getRating('engaging_level');
+
+            if (difficulty === 0 || lectureStyle === 0 || engagingLevel === 0) {
+                alert('Please rate all categories');
+                return;
+            }
+
+            validationMessage.style.display = 'none';
+            formBottom.style.display = 'none';
+            loader.style.display = 'block';
+
+            try {
+                let result;
+                if (editingCommentId) {
+                    result = await window.comments.update(editingCommentId, currentSubject, difficulty, lectureStyle, engagingLevel, textarea.value.trim());
+                } else {
+                    result = await window.comments.create(currentSubject, difficulty, lectureStyle, engagingLevel, textarea.value.trim());
+                }
+                
                 setTimeout(() => {
                     loader.style.display = 'none';
-                    submittedMessage.style.display = 'block';
+                    if (result.success) {
+                        submittedMessage.style.display = 'block';
+                        loadUserComments();
+                        
+                        // Reset form
+                        setTimeout(() => {
+                            submittedMessage.style.display = 'none';
+                            formBottom.style.display = 'block';
+                            textarea.value = '';
+                            document.querySelectorAll('.star').forEach(star => {
+                                star.classList.remove('active');
+                            });
+                            editingCommentId = null;
+                            submitButton.textContent = 'Submit answer';
+                        }, 2000);
+                    } else {
+                        alert(result.error || 'Failed to save comment');
+                        formBottom.style.display = 'block';
+                    }
                 }, 1000);
+            } catch (error) {
+                console.error('Submit error:', error);
+                loader.style.display = 'none';
+                alert('Network error. Please try again.');
+                formBottom.style.display = 'block';
             }
         });
+
+        function getRating(type) {
+            const stars = document.querySelector(`[data-rating-type="${type}"]`).querySelectorAll('.star');
+            let count = 0;
+            stars.forEach(star => {
+                if (star.classList.contains('active')) count++;
+            });
+            return count;
+        }
     </script>
 </body>
 </html>

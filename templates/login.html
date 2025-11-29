@@ -139,7 +139,9 @@
             font-weight: bold;
         }
 
-        .login-form input[type="text"] {
+        .login-form input[type="text"], 
+        .login-form input[type="email"], 
+        .login-form input[type="password"] {
             width: 100%;
             padding: 12px;
             border: 1px solid #ccc;
@@ -147,6 +149,7 @@
             box-sizing: border-box;
             font-family: 'Didact Gothic', sans-serif;
             font-size: 1em;
+            margin-bottom: 15px;
         }
 
         .login-form .next-btn {
@@ -166,6 +169,46 @@
 
         .login-form .next-btn:hover {
             background-color: #0000a0;
+        }
+
+        .signup-btn {
+            width: 100%;
+            padding: 12px;
+            margin-top: 10px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-family: 'Didact Gothic', sans-serif;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .signup-btn:hover {
+            background-color: #218838;
+        }
+
+        .auth-message {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 5px;
+            text-align: center;
+            font-weight: bold;
+            display: none;
+        }
+
+        .auth-message.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .auth-message.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
         }
 
         /* Menu styles */
@@ -250,11 +293,15 @@
     <div class="main-content">
         <div class="login-container">
             <h1 class="login-title">Login</h1>
-            <form class="login-form">
-                <label for="username">Username (full email address)</label>
-                <input type="text" id="username" name="username" placeholder="Enter your username">
-                <button type="submit" class="next-btn">NEXT</button>
+            <form class="login-form" id="loginForm">
+                <label for="email">Email Address</label>
+                <input type="email" id="email" name="email" placeholder="Enter your email" required>
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" placeholder="Enter your password" required>
+                <button type="submit" class="next-btn">LOGIN</button>
+                <button type="button" id="signupBtn" class="signup-btn">SIGN UP</button>
             </form>
+            <div id="authMessage" class="auth-message"></div>
         </div>
     </div>
 
@@ -269,6 +316,104 @@
         </div>
     </div>
 
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="../static/db.js"></script>
     <script src="../static/main.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const loginForm = document.getElementById('loginForm');
+            const signupBtn = document.getElementById('signupBtn');
+            const authMessage = document.getElementById('authMessage');
+            const emailInput = document.getElementById('email');
+            const passwordInput = document.getElementById('password');
+
+            // Show message helper
+            function showMessage(message, type) {
+                authMessage.textContent = message;
+                authMessage.className = `auth-message ${type}`;
+                authMessage.style.display = 'block';
+                setTimeout(() => {
+                    authMessage.style.display = 'none';
+                }, 5000);
+            }
+
+            // Login form submission
+            loginForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const email = emailInput.value.trim();
+                const password = passwordInput.value;
+
+                if (!email || !password) {
+                    showMessage('Please fill in all fields', 'error');
+                    return;
+                }
+
+                // Show loading state
+                const submitBtn = document.querySelector('.next-btn');
+                const originalText = submitBtn.textContent;
+                submitBtn.textContent = 'Logging in...';
+                submitBtn.disabled = true;
+
+                try {
+                    const result = await window.auth.signIn(email, password);
+                    
+                    if (result.success) {
+                        showMessage('Login successful! Redirecting...', 'success');
+                        setTimeout(() => {
+                            window.location.href = 'subjects.html';
+                        }, 1000);
+                    } else {
+                        showMessage(result.error || 'Login failed. Please try again.', 'error');
+                    }
+                } catch (error) {
+                    console.error('Login error:', error);
+                    showMessage('Network error. Please try again.', 'error');
+                } finally {
+                    // Reset button state
+                    submitBtn.textContent = originalText;
+                    submitBtn.disabled = false;
+                }
+            });
+
+            // Sign up button
+            signupBtn.addEventListener('click', async function() {
+                const email = emailInput.value.trim();
+                const password = passwordInput.value;
+
+                if (!email || !password) {
+                    showMessage('Please fill in all fields', 'error');
+                    return;
+                }
+
+                if (password.length < 6) {
+                    showMessage('Password must be at least 6 characters long', 'error');
+                    return;
+                }
+
+                // Show loading state
+                const originalText = signupBtn.textContent;
+                signupBtn.textContent = 'Signing up...';
+                signupBtn.disabled = true;
+
+                try {
+                    const result = await window.auth.signUp(email, password);
+                    
+                    if (result.success) {
+                        showMessage('Sign up successful! Please check your email to confirm your account.', 'success');
+                    } else {
+                        showMessage(result.error || 'Sign up failed. Please try again.', 'error');
+                    }
+                } catch (error) {
+                    console.error('Sign up error:', error);
+                    showMessage('Network error. Please try again.', 'error');
+                } finally {
+                    // Reset button state
+                    signupBtn.textContent = originalText;
+                    signupBtn.disabled = false;
+                }
+            });
+        });
+    </script>
 </body>
 </html>
