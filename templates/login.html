@@ -139,9 +139,7 @@
             font-weight: bold;
         }
 
-        .login-form input[type="text"], 
-        .login-form input[type="email"], 
-        .login-form input[type="password"] {
+        .login-form input[type="text"] {
             width: 100%;
             padding: 12px;
             border: 1px solid #ccc;
@@ -360,9 +358,19 @@
                     
                     if (result.success) {
                         showMessage('Login successful! Redirecting...', 'success');
-                        setTimeout(() => {
+                        
+                        // Wait for auth state to be properly set
+                        await new Promise(resolve => setTimeout(resolve, 1500));
+                        
+                        // Double-check that user is actually logged in
+                        const currentUser = await window.auth.getCurrentUser();
+                        if (currentUser) {
+                            // Update activity timestamp
+                            window.auth.updateLastActivity();
                             window.location.href = 'subjects.html';
-                        }, 1000);
+                        } else {
+                            showMessage('Authentication failed. Please try again.', 'error');
+                        }
                     } else {
                         showMessage(result.error || 'Login failed. Please try again.', 'error');
                     }

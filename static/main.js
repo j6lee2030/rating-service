@@ -2,14 +2,29 @@
 let currentUser = null;
 let currentSubject = null;
 let editingCommentId = null;
+let activityTimer = null;
 
 // Initialize authentication and UI
 document.addEventListener('DOMContentLoaded', function() {
+    // Test Supabase connection
+    if (window.testSupabaseConnection) {
+        window.testSupabaseConnection().then(success => {
+            if (success) {
+                console.log('✅ Supabase connection is working!');
+            } else {
+                console.error('❌ Supabase connection failed!');
+            }
+        });
+    }
+    
     // Check if user is logged in
     checkAuthState();
     
     // Set up menu functionality
     setupMenu();
+    
+    // Set up activity tracking
+    setupActivityTracking();
     
     // Set up auth state listener
     if (window.auth) {
@@ -17,9 +32,11 @@ document.addEventListener('DOMContentLoaded', function() {
             if (event === 'SIGNED_IN') {
                 currentUser = session.user;
                 updateUIForLoggedInUser();
+                startActivityTracking();
             } else if (event === 'SIGNED_OUT') {
                 currentUser = null;
                 updateUIForLoggedOutUser();
+                stopActivityTracking();
             }
         });
     }
@@ -28,10 +45,26 @@ document.addEventListener('DOMContentLoaded', function() {
 // Check authentication state
 async function checkAuthState() {
     if (window.auth) {
-        currentUser = await window.auth.getCurrentUser();
-        if (currentUser) {
-            updateUIForLoggedInUser();
-        } else {
+        try {
+            // Wait a bit for Supabase to initialize
+            await new Promise(resolve => setTimeout(resolve, 100));
+            
+            // Check if session is still valid (not expired due to inactivity)
+            const isValid = await window.auth.checkSessionValidity();
+            if (!isValid) {
+                updateUIForLoggedOutUser();
+                return;
+            }
+            
+            currentUser = await window.auth.getCurrentUser();
+            if (currentUser) {
+                updateUIForLoggedInUser();
+                startActivityTracking();
+            } else {
+                updateUIForLoggedOutUser();
+            }
+        } catch (error) {
+            console.error('Error checking auth state:', error);
             updateUIForLoggedOutUser();
         }
     }
@@ -39,11 +72,20 @@ async function checkAuthState() {
 
 // Update UI for logged in user
 function updateUIForLoggedInUser() {
-    // Update login button to show user email
+    // Update login button to show "Get started"
     const loginBtn = document.querySelector('.login-link-btn');
     if (loginBtn && currentUser) {
-        loginBtn.textContent = `Welcome, ${currentUser.email}`;
+        loginBtn.textContent = 'Get started';
         loginBtn.href = 'subjects.html';
+        
+        // Add or update welcome message below the button
+        let welcomeMsg = document.querySelector('.welcome-message');
+        if (!welcomeMsg) {
+            welcomeMsg = document.createElement('div');
+            welcomeMsg.className = 'welcome-message';
+            loginBtn.parentNode.insertBefore(welcomeMsg, loginBtn.nextSibling);
+        }
+        welcomeMsg.textContent = `Welcome, ${currentUser.email}`;
     }
     
     // Load comments if on subjects page
@@ -58,6 +100,12 @@ function updateUIForLoggedOutUser() {
     if (loginBtn) {
         loginBtn.textContent = 'Login';
         loginBtn.href = 'login.html';
+        
+        // Remove welcome message if it exists
+        const welcomeMsg = document.querySelector('.welcome-message');
+        if (welcomeMsg) {
+            welcomeMsg.remove();
+        }
     }
 }
 
@@ -236,10 +284,54 @@ async function logout() {
             const result = await window.auth.signOut();
             if (result.success) {
                 currentUser = null;
+                stopActivityTracking();
                 window.location.href = 'login.html';
             } else {
                 alert('Logout failed. Please try again.');
             }
         }
+    }
+}
+
+// Activity tracking functions
+function setupActivityTracking() {
+    // Track user activity events
+    const activityEvents = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'];
+    
+    activityEvents.forEach(event => {
+        document.addEventListener(event, updateActivity, true);
+    });
+}
+
+function startActivityTracking() {
+    if (currentUser && window.auth) {
+        // Update activity immediately when user logs in
+        window.auth.updateLastActivity();
+        
+        // Set up periodic session validity check (every 5 minutes)
+        activityTimer = setInterval(async () => {
+            if (currentUser && window.auth) {
+                const isValid = await window.auth.checkSessionValidity();
+                if (!isValid) {
+                    console.log('Session expired due to inactivity');
+                    currentUser = null;
+                    updateUIForLoggedOutUser();
+                    stopActivityTracking();
+                }
+            }
+        }, 5 * 60 * 1000); // Check every 5 minutes
+    }
+}
+
+function stopActivityTracking() {
+    if (activityTimer) {
+        clearInterval(activityTimer);
+        activityTimer = null;
+    }
+}
+
+function updateActivity() {
+    if (currentUser && window.auth) {
+        window.auth.updateLastActivity();
     }
 }

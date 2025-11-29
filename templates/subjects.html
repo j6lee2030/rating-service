@@ -127,6 +127,7 @@
             color: #555;
             text-align: left;
             flex: 1;
+            font-family: 'Didact Gothic', sans-serif;
         }
         .stars {
             font-size: 1em;
@@ -176,6 +177,7 @@
             color: navy;
             font-size: 1.2em;
             font-weight: bold;
+            font-family: 'Didact Gothic', sans-serif;
             background-color: white;
             padding: 10px 20px;
             border-radius: 5px;
@@ -307,9 +309,27 @@
     <script src="../static/main.js"></script>
     <script>
         // Check if user is logged in
-        document.addEventListener('DOMContentLoaded', function() {
-            if (!currentUser) {
-                alert('Please login first');
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Wait a bit for auth state to be loaded
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            // Check authentication state properly
+            if (window.auth) {
+                const isValid = await window.auth.checkSessionValidity();
+                if (!isValid) {
+                    alert('Please login first');
+                    window.location.href = 'login.html';
+                    return;
+                }
+                
+                currentUser = await window.auth.getCurrentUser();
+                if (!currentUser) {
+                    alert('Please login first');
+                    window.location.href = 'login.html';
+                    return;
+                }
+            } else {
+                alert('Authentication not available. Please login first');
                 window.location.href = 'login.html';
                 return;
             }
@@ -384,6 +404,17 @@
         });
 
         submitButton.addEventListener('click', async () => {
+            // Check if user is authenticated
+            if (!currentUser) {
+                const user = await window.auth.getCurrentUser();
+                if (!user) {
+                    alert('You must be logged in to post. Redirecting to login...');
+                    window.location.href = 'login.html';
+                    return;
+                }
+                currentUser = user;
+            }
+
             if (!currentSubject) {
                 alert('Please select a subject first');
                 return;
@@ -425,32 +456,33 @@
                     result = await window.comments.create(currentSubject, difficulty, lectureStyle, engagingLevel, textarea.value.trim());
                 }
                 
-                setTimeout(() => {
-                    loader.style.display = 'none';
-                    if (result.success) {
-                        submittedMessage.style.display = 'block';
-                        loadUserComments();
-                        
-                        // Reset form
-                        setTimeout(() => {
-                            submittedMessage.style.display = 'none';
-                            formBottom.style.display = 'block';
-                            textarea.value = '';
-                            document.querySelectorAll('.star').forEach(star => {
-                                star.classList.remove('active');
-                            });
-                            editingCommentId = null;
-                            submitButton.textContent = 'Submit answer';
-                        }, 2000);
-                    } else {
-                        alert(result.error || 'Failed to save comment');
+                // Hide loader immediately when posting completes
+                loader.style.display = 'none';
+                
+                if (result.success) {
+                    submittedMessage.style.display = 'block';
+                    loadUserComments();
+                    
+                    // Reset form
+                    setTimeout(() => {
+                        submittedMessage.style.display = 'none';
                         formBottom.style.display = 'block';
-                    }
-                }, 1000);
+                        textarea.value = '';
+                        document.querySelectorAll('.star').forEach(star => {
+                            star.classList.remove('active');
+                        });
+                        editingCommentId = null;
+                        submitButton.textContent = 'Submit answer';
+                    }, 2000);
+                } else {
+                    console.error('Post error:', result.error);
+                    alert(result.error || 'Failed to save comment. Please check the console for details.');
+                    formBottom.style.display = 'block';
+                }
             } catch (error) {
                 console.error('Submit error:', error);
                 loader.style.display = 'none';
-                alert('Network error. Please try again.');
+                alert('Network error. Please try again. Check console for details.');
                 formBottom.style.display = 'block';
             }
         });
