@@ -869,7 +869,12 @@ body.with-subjects-bg .main-box {
 .comments-display {
     max-width: 600px;
     margin: var(--spacing-xl) auto;
-    padding: 0 var(--spacing-md);
+    padding: var(--spacing-xl);
+    background-color: var(--bg-card);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow-md);
+    position: relative;
+    z-index: 1;
 }
 
 .comments-display h3 {
@@ -879,6 +884,14 @@ body.with-subjects-bg .main-box {
     margin-bottom: var(--spacing-lg);
     padding-bottom: var(--spacing-sm);
     border-bottom: 2px solid var(--border-color);
+}
+
+/* 댓글 없을 때 메시지 */
+.no-comments {
+    text-align: center;
+    color: var(--text-muted);
+    padding: var(--spacing-xl);
+    font-size: 0.95rem;
 }
 
 .comments-list {

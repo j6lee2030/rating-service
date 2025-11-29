@@ -90,7 +90,7 @@ function updateUIForLoggedInUser() {
     
     // Load comments if on subjects page
     if (window.location.pathname.includes('subjects.html')) {
-        loadUserComments();
+        window.loadUserComments();
     }
 }
 
@@ -133,13 +133,20 @@ function setupMenu() {
 }
 
 // Load user comments
-async function loadUserComments() {
+// 사용자 댓글 로드 (전역 등록)
+window.loadUserComments = async function loadUserComments() {
+    // subjects 페이지에서 별도 함수가 정의되어 있으면 그것을 사용
+    if (window.loadCommentsForSubjectsPage) {
+        await window.loadCommentsForSubjectsPage();
+        return;
+    }
+    
     if (!currentUser || !window.comments) return;
     
     try {
         const result = await window.comments.getAll();
         if (result.success) {
-            displayComments(result.data);
+            window.displayComments(result.data);
         } else {
             console.error('Failed to load comments:', result.error);
         }
@@ -149,25 +156,39 @@ async function loadUserComments() {
 }
 
 // Display comments in UI
-function displayComments(comments) {
-    // Remove existing comments display
-    const existingComments = document.querySelector('.comments-display');
-    if (existingComments) {
-        existingComments.remove();
+// 댓글 목록을 화면에 렌더링 (전역 함수로 등록)
+window.displayComments = function displayComments(comments) {
+    // 기존 댓글 목록 컨테이너 찾기
+    let commentsList = document.getElementById('comments-list');
+    let commentsContainer = document.getElementById('comments-container');
+    
+    // 컨테이너가 없으면 동적으로 생성
+    if (!commentsContainer) {
+        commentsContainer = document.createElement('div');
+        commentsContainer.className = 'comments-display';
+        commentsContainer.id = 'comments-container';
+        commentsContainer.innerHTML = `
+            <h3>내 리뷰 목록</h3>
+            <div class="comments-list" id="comments-list"></div>
+        `;
+        
+        const mainBox = document.querySelector('.main-box');
+        if (mainBox) {
+            mainBox.insertAdjacentElement('afterend', commentsContainer);
+        }
+        commentsList = document.getElementById('comments-list');
     }
+    
+    if (!commentsList) return;
 
-    if (comments.length === 0) {
+    // 댓글이 없는 경우
+    if (!comments || comments.length === 0) {
+        commentsList.innerHTML = '<p class="no-comments">아직 작성한 리뷰가 없습니다.</p>';
         return;
     }
 
-    const commentsContainer = document.createElement('div');
-    commentsContainer.className = 'comments-display';
-    commentsContainer.innerHTML = `
-        <h3>Your Comments</h3>
-        <div class="comments-list"></div>
-    `;
-
-    const commentsList = commentsContainer.querySelector('.comments-list');
+    // 댓글 목록 렌더링
+    commentsList.innerHTML = '';
     
     comments.forEach(comment => {
         const commentDiv = document.createElement('div');
@@ -175,31 +196,28 @@ function displayComments(comments) {
         commentDiv.innerHTML = `
             <div class="comment-header">
                 <strong>${comment.subject}</strong>
-                <span class="comment-date">${new Date(comment.created_at).toLocaleDateString()}</span>
+                <span class="comment-date">${new Date(comment.created_at).toLocaleDateString('ko-KR')}</span>
             </div>
             <div class="comment-ratings">
-                <span>Difficulty: ${'★'.repeat(comment.difficulty)}${'☆'.repeat(5-comment.difficulty)}</span>
-                <span>Lecture Style: ${'★'.repeat(comment.lecture_style)}${'☆'.repeat(5-comment.lecture_style)}</span>
-                <span>Engaging: ${'★'.repeat(comment.engaging_level)}${'☆'.repeat(5-comment.engaging_level)}</span>
+                <span>난이도: ${'★'.repeat(comment.difficulty)}${'☆'.repeat(5-comment.difficulty)}</span>
+                <span>강의 스타일: ${'★'.repeat(comment.lecture_style)}${'☆'.repeat(5-comment.lecture_style)}</span>
+                <span>흥미도: ${'★'.repeat(comment.engaging_level)}${'☆'.repeat(5-comment.engaging_level)}</span>
             </div>
             <div class="comment-reason">${comment.reason}</div>
             <div class="comment-actions">
-                <button onclick="editComment('${comment.id}')" class="edit-btn">Edit</button>
-                <button onclick="deleteComment('${comment.id}')" class="delete-btn">Delete</button>
+                <button onclick="window.editComment('${comment.id}')" class="edit-btn">수정</button>
+                <button onclick="window.deleteComment('${comment.id}')" class="delete-btn">삭제</button>
             </div>
         `;
         commentsList.appendChild(commentDiv);
     });
-
-    // Insert after the main box
-    const mainBox = document.querySelector('.main-box');
-    if (mainBox) {
-        mainBox.insertAdjacentElement('afterend', commentsContainer);
-    }
+    
+    console.log(`✅ ${comments.length}개의 리뷰가 표시됨`);
 }
 
 // Edit comment function
-async function editComment(commentId) {
+// 댓글 수정 함수 (전역 등록)
+window.editComment = async function editComment(commentId) {
     if (!currentUser || !window.comments) return;
     
     try {
@@ -216,9 +234,9 @@ async function editComment(commentId) {
                 }
                 
                 // Set ratings
-                setRating('difficulty', comment.difficulty);
-                setRating('lecture_style', comment.lecture_style);
-                setRating('engaging_level', comment.engaging_level);
+                window.setRating('difficulty', comment.difficulty);
+                window.setRating('lecture_style', comment.lecture_style);
+                window.setRating('engaging_level', comment.engaging_level);
                 
                 // Set reason
                 const textarea = document.querySelector('.reason-box textarea');
@@ -227,13 +245,14 @@ async function editComment(commentId) {
                 }
                 
                 // Show form and set editing state
+                // 폼 표시 및 수정 모드 설정
                 const ratingContent = document.querySelector('.rating-content');
                 const formBottom = document.querySelector('.form-bottom');
                 const submitButton = document.querySelector('.submit-button');
                 
                 if (ratingContent) ratingContent.style.display = 'flex';
                 if (formBottom) formBottom.style.display = 'block';
-                if (submitButton) submitButton.textContent = 'Update Comment';
+                if (submitButton) submitButton.textContent = '수정하기';
                 
                 editingCommentId = commentId;
                 
@@ -248,7 +267,8 @@ async function editComment(commentId) {
 }
 
 // Set rating stars
-function setRating(type, rating) {
+// 별점 설정 함수 (전역 등록)
+window.setRating = function setRating(type, rating) {
     const stars = document.querySelector(`[data-rating-type="${type}"]`);
     if (stars) {
         const starElements = stars.querySelectorAll('.star');
@@ -259,27 +279,29 @@ function setRating(type, rating) {
 }
 
 // Delete comment function
-async function deleteComment(commentId) {
+// 댓글 삭제 함수 (전역 등록)
+window.deleteComment = async function deleteComment(commentId) {
     if (!currentUser || !window.comments) return;
     
-    if (confirm('Are you sure you want to delete this comment?')) {
+    if (confirm('이 리뷰를 삭제하시겠습니까?')) {
         try {
             const result = await window.comments.delete(commentId);
             if (result.success) {
-                loadUserComments();
+                window.loadUserComments();
             } else {
-                alert(result.error || 'Failed to delete comment');
+                alert(result.error || '삭제 실패. 다시 시도해주세요.');
             }
         } catch (error) {
-            console.error('Delete error:', error);
-            alert('Network error. Please try again.');
+            console.error('삭제 오류:', error);
+            alert('네트워크 오류. 다시 시도해주세요.');
         }
     }
 }
 
 // Logout function
-async function logout() {
-    if (confirm('Are you sure you want to logout?')) {
+// 로그아웃 함수 (전역 등록)
+window.logout = async function logout() {
+    if (confirm('로그아웃 하시겠습니까?')) {
         if (window.auth) {
             const result = await window.auth.signOut();
             if (result.success) {
@@ -287,7 +309,7 @@ async function logout() {
                 stopActivityTracking();
                 window.location.href = 'login.html';
             } else {
-                alert('Logout failed. Please try again.');
+                alert('로그아웃 실패. 다시 시도해주세요.');
             }
         }
     }

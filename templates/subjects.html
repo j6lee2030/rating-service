@@ -15,7 +15,7 @@
         </a>
         <nav class="header-menu">
             <a href="index.html">홈</a>
-            <button id="logout-btn" onclick="logout()">로그아웃</button>
+            <button id="logout-btn" onclick="window.logout()">로그아웃</button>
         </nav>
     </header>
 
@@ -96,11 +96,19 @@
         </div>
     </div>
 
+    <!-- 내 리뷰 목록 -->
+    <div class="comments-display" id="comments-container">
+        <h3>내 리뷰 목록</h3>
+        <div class="comments-list" id="comments-list">
+            <p class="no-comments">아직 작성한 리뷰가 없습니다.</p>
+        </div>
+    </div>
+
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <script src="../static/db.js"></script>
     <script src="../static/main.js"></script>
     <script>
-        // 로그인 확인
+        // 로그인 확인 및 댓글 로드
         document.addEventListener('DOMContentLoaded', async function() {
             // 인증 상태 로드 대기
             await new Promise(resolve => setTimeout(resolve, 500));
@@ -120,14 +128,44 @@
                     window.location.href = 'login.html';
                     return;
                 }
+                
+                console.log('✅ 로그인 확인됨:', currentUser.email);
             } else {
                 alert('인증 시스템을 사용할 수 없습니다. 로그인해주세요');
                 window.location.href = 'login.html';
                 return;
             }
             
-            loadUserComments();
+            // 댓글 로드
+            await loadCommentsForSubjectsPage();
         });
+        
+        // 과목 페이지 전용 댓글 로드 함수 (전역 등록)
+        window.loadCommentsForSubjectsPage = async function loadCommentsForSubjectsPage() {
+            if (!currentUser) {
+                console.log('❌ currentUser가 없어서 댓글 로드 건너뜀');
+                return;
+            }
+            
+            if (!window.comments) {
+                console.log('❌ window.comments가 없음');
+                return;
+            }
+            
+            try {
+                console.log('📥 댓글 로드 시작...');
+                const result = await window.comments.getAll();
+                
+                if (result.success) {
+                    console.log(`✅ ${result.data.length}개의 댓글 로드됨`);
+                    window.displayComments(result.data);
+                } else {
+                    console.error('❌ 댓글 로드 실패:', result.error);
+                }
+            } catch (error) {
+                console.error('❌ 댓글 로드 오류:', error);
+            }
+        }
 
         const dropdownSelect = document.querySelector('.dropdown-select');
         const dropdownList = document.querySelector('.dropdown-list');
@@ -247,7 +285,7 @@
                 
                 if (result.success) {
                     submittedMessage.style.display = 'block';
-                    loadUserComments();
+                    await loadCommentsForSubjectsPage();
                     
                     // 폼 초기화
                     setTimeout(() => {
