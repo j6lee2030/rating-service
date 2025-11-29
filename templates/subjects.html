@@ -15,6 +15,7 @@
         </a>
         <nav class="header-menu">
             <a href="index.html">홈</a>
+            <a href="reviews.html">리뷰 보기</a>
             <button id="logout-btn" onclick="window.logout()">로그아웃</button>
         </nav>
     </header>
@@ -26,6 +27,9 @@
 
     <!-- 메인 평가 박스 -->
     <div class="main-box">
+        <h2 class="form-title">📝 과목 평가하기</h2>
+        <p class="form-description">과목을 선택하고 솔직한 평가를 남겨주세요</p>
+        
         <!-- 과목 선택 드롭다운 -->
         <div class="custom-dropdown">
             <div class="dropdown-select">과목을 선택하세요</div>
@@ -92,15 +96,10 @@
             
             <!-- 로딩 & 완료 메시지 -->
             <div class="loader" id="submit-loader"></div>
-            <div class="submitted-message">리뷰가 제출되었습니다!</div>
-        </div>
-    </div>
-
-    <!-- 내 리뷰 목록 -->
-    <div class="comments-display" id="comments-container">
-        <h3>내 리뷰 목록</h3>
-        <div class="comments-list" id="comments-list">
-            <p class="no-comments">아직 작성한 리뷰가 없습니다.</p>
+            <div class="submitted-message">
+                리뷰가 제출되었습니다! 🎉
+                <a href="reviews.html" class="view-reviews-link">리뷰 보러가기 →</a>
+            </div>
         </div>
     </div>
 
@@ -108,12 +107,10 @@
     <script src="../static/db.js"></script>
     <script src="../static/main.js"></script>
     <script>
-        // 로그인 확인 및 댓글 로드
+        // 로그인 확인
         document.addEventListener('DOMContentLoaded', async function() {
-            // 인증 상태 로드 대기
             await new Promise(resolve => setTimeout(resolve, 500));
             
-            // 인증 상태 확인
             if (window.auth) {
                 const isValid = await window.auth.checkSessionValidity();
                 if (!isValid) {
@@ -131,47 +128,16 @@
                 
                 console.log('✅ 로그인 확인됨:', currentUser.email);
             } else {
-                alert('인증 시스템을 사용할 수 없습니다. 로그인해주세요');
+                alert('인증 시스템을 사용할 수 없습니다');
                 window.location.href = 'login.html';
                 return;
             }
-            
-            // 댓글 로드
-            await loadCommentsForSubjectsPage();
         });
-        
-        // 과목 페이지 전용 댓글 로드 함수 (전역 등록)
-        window.loadCommentsForSubjectsPage = async function loadCommentsForSubjectsPage() {
-            if (!currentUser) {
-                console.log('❌ currentUser가 없어서 댓글 로드 건너뜀');
-                return;
-            }
-            
-            if (!window.comments) {
-                console.log('❌ window.comments가 없음');
-                return;
-            }
-            
-            try {
-                console.log('📥 댓글 로드 시작...');
-                const result = await window.comments.getAll();
-                
-                if (result.success) {
-                    console.log(`✅ ${result.data.length}개의 댓글 로드됨`);
-                    window.displayComments(result.data);
-                } else {
-                    console.error('❌ 댓글 로드 실패:', result.error);
-                }
-            } catch (error) {
-                console.error('❌ 댓글 로드 오류:', error);
-            }
-        }
 
         const dropdownSelect = document.querySelector('.dropdown-select');
         const dropdownList = document.querySelector('.dropdown-list');
         const ratingContent = document.querySelector('.rating-content');
         const submitButton = document.querySelector('.submit-button');
-        const pageLoaderOverlay = document.querySelector('.page-loader-overlay');
         
         // 드롭다운 토글
         dropdownSelect.addEventListener('click', () => {
@@ -200,7 +166,6 @@
                     star.classList.remove('active');
                 });
                 
-                // 수정 모드 초기화
                 editingCommentId = null;
                 submitButton.textContent = '제출하기';
             }
@@ -229,7 +194,6 @@
 
         // 제출 버튼 클릭
         submitButton.addEventListener('click', async () => {
-            // 로그인 확인
             if (!currentUser) {
                 const user = await window.auth.getCurrentUser();
                 if (!user) {
@@ -259,7 +223,6 @@
                 return;
             }
 
-            // 평점 확인
             const difficulty = getRating('difficulty');
             const lectureStyle = getRating('lecture_style');
             const engagingLevel = getRating('engaging_level');
@@ -285,33 +248,19 @@
                 
                 if (result.success) {
                     submittedMessage.style.display = 'block';
-                    await loadCommentsForSubjectsPage();
-                    
-                    // 폼 초기화
-                    setTimeout(() => {
-                        submittedMessage.style.display = 'none';
-                        formBottom.style.display = 'block';
-                        textarea.value = '';
-                        document.querySelectorAll('.star').forEach(star => {
-                            star.classList.remove('active');
-                        });
-                        editingCommentId = null;
-                        submitButton.textContent = '제출하기';
-                    }, 2000);
                 } else {
                     console.error('저장 오류:', result.error);
-                    alert(result.error || '저장 실패. 콘솔을 확인해주세요.');
+                    alert(result.error || '저장 실패');
                     formBottom.style.display = 'block';
                 }
             } catch (error) {
                 console.error('제출 오류:', error);
                 loader.style.display = 'none';
-                alert('네트워크 오류. 다시 시도해주세요.');
+                alert('네트워크 오류');
                 formBottom.style.display = 'block';
             }
         });
 
-        // 별점 가져오기
         function getRating(type) {
             const stars = document.querySelector(`[data-rating-type="${type}"]`).querySelectorAll('.star');
             let count = 0;

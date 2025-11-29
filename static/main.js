@@ -88,10 +88,6 @@ function updateUIForLoggedInUser() {
         welcomeMsg.textContent = `Welcome, ${currentUser.email}`;
     }
     
-    // Load comments if on subjects page
-    if (window.location.pathname.includes('subjects.html')) {
-        window.loadUserComments();
-    }
 }
 
 // Update UI for logged out user
@@ -133,11 +129,10 @@ function setupMenu() {
 }
 
 // Load user comments
-// 사용자 댓글 로드 (전역 등록)
+// 사용자 댓글 로드 (전역 등록) - subjects.html에서는 동작하지 않음
 window.loadUserComments = async function loadUserComments() {
-    // subjects 페이지에서 별도 함수가 정의되어 있으면 그것을 사용
-    if (window.loadCommentsForSubjectsPage) {
-        await window.loadCommentsForSubjectsPage();
+    // subjects.html에서는 리뷰 목록을 표시하지 않음
+    if (window.location.pathname.includes('subjects.html')) {
         return;
     }
     
@@ -155,31 +150,22 @@ window.loadUserComments = async function loadUserComments() {
     }
 }
 
-// Display comments in UI
-// 댓글 목록을 화면에 렌더링 (전역 함수로 등록)
+// Display comments in UI (reviews.html 전용)
+// subjects.html에서는 동작하지 않음
 window.displayComments = function displayComments(comments) {
+    // subjects.html에서는 리뷰 목록을 표시하지 않음
+    if (window.location.pathname.includes('subjects.html')) {
+        return;
+    }
+    
     // 기존 댓글 목록 컨테이너 찾기
     let commentsList = document.getElementById('comments-list');
     let commentsContainer = document.getElementById('comments-container');
     
-    // 컨테이너가 없으면 동적으로 생성
-    if (!commentsContainer) {
-        commentsContainer = document.createElement('div');
-        commentsContainer.className = 'comments-display';
-        commentsContainer.id = 'comments-container';
-        commentsContainer.innerHTML = `
-            <h3>내 리뷰 목록</h3>
-            <div class="comments-list" id="comments-list"></div>
-        `;
-        
-        const mainBox = document.querySelector('.main-box');
-        if (mainBox) {
-            mainBox.insertAdjacentElement('afterend', commentsContainer);
-        }
-        commentsList = document.getElementById('comments-list');
+    // 컨테이너가 없으면 리턴 (동적 생성 제거)
+    if (!commentsContainer || !commentsList) {
+        return;
     }
-    
-    if (!commentsList) return;
 
     // 댓글이 없는 경우
     if (!comments || comments.length === 0) {
@@ -226,6 +212,12 @@ window.editComment = async function editComment(commentId) {
             const comment = result.data.find(c => c.id === commentId);
             
             if (comment) {
+                // 리뷰 작성 탭으로 이동
+                const writeTabBtn = document.querySelector('[data-tab="write-review"]');
+                if (writeTabBtn) {
+                    writeTabBtn.click();
+                }
+                
                 // Set the subject
                 const dropdownSelect = document.querySelector('.dropdown-select');
                 if (dropdownSelect) {
@@ -257,12 +249,15 @@ window.editComment = async function editComment(commentId) {
                 editingCommentId = commentId;
                 
                 // Scroll to form
-                ratingContent.scrollIntoView({ behavior: 'smooth' });
+                setTimeout(() => {
+                    const mainBox = document.querySelector('.main-box');
+                    if (mainBox) mainBox.scrollIntoView({ behavior: 'smooth' });
+                }, 100);
             }
         }
     } catch (error) {
-        console.error('Failed to load comment for editing:', error);
-        alert('Failed to load comment for editing');
+        console.error('리뷰 수정 로드 실패:', error);
+        alert('리뷰를 불러오는데 실패했습니다.');
     }
 }
 
@@ -287,7 +282,20 @@ window.deleteComment = async function deleteComment(commentId) {
         try {
             const result = await window.comments.delete(commentId);
             if (result.success) {
-                window.loadUserComments();
+                // 현재 활성화된 탭 새로고침
+                const activeTab = document.querySelector('.tab-btn.active');
+                if (activeTab) {
+                    const tabId = activeTab.dataset.tab;
+                    if (tabId === 'all-reviews' && window.loadAllReviews) {
+                        window.loadAllReviews();
+                    } else if (tabId === 'my-reviews' && window.loadMyReviews) {
+                        window.loadMyReviews();
+                    }
+                }
+                // 레거시 호환
+                if (window.loadUserComments) {
+                    window.loadUserComments();
+                }
             } else {
                 alert(result.error || '삭제 실패. 다시 시도해주세요.');
             }

@@ -130,6 +130,7 @@ window.auth = {
 // Comment CRUD functions
 window.comments = {
     // Create a new comment
+    // 새 리뷰 작성 (user_id 자동 저장)
     async create(subject, difficulty, lectureStyle, engagingLevel, reason) {
         try {
             // Check if user is authenticated
@@ -140,7 +141,7 @@ window.comments = {
             }
 
             console.log('Creating comment with data:', {
-                subject, difficulty, lectureStyle, engagingLevel, reason
+                subject, difficulty, lectureStyle, engagingLevel, reason, user_id: user.id
             });
             
             const { data, error } = await window.supabaseClient
@@ -151,7 +152,8 @@ window.comments = {
                         difficulty: difficulty,
                         lecture_style: lectureStyle,
                         engaging_level: engagingLevel,
-                        reason: reason
+                        reason: reason,
+                        user_id: user.id
                     }
                 ])
                 .select();
@@ -169,7 +171,74 @@ window.comments = {
         }
     },
 
-    // Get all comments for current user
+    // Get my comments only
+    // 내 리뷰만 가져오기
+    async getMyComments() {
+        try {
+            const { data: { user } } = await window.supabaseClient.auth.getUser();
+            if (!user) {
+                return { success: false, error: 'Not authenticated' };
+            }
+
+            console.log('Fetching my comments...');
+            const { data, error } = await window.supabaseClient
+                .from('comments')
+                .select('*')
+                .eq('user_id', user.id)
+                .order('created_at', { ascending: false });
+            
+            if (error) {
+                console.error('Supabase error:', error);
+                throw error;
+            }
+            
+            console.log('My comments fetched:', data?.length || 0);
+            return { success: true, data: data || [] };
+        } catch (error) {
+            console.error('Get my comments error:', error);
+            return { success: false, error: error.message };
+        }
+    },
+
+    // Get all comments (for public review list)
+    // 전체 리뷰 가져오기 (공개용)
+    async getAllPublic(subjectFilter = null) {
+        try {
+            console.log('📥 Fetching all public comments...');
+            console.log('필터:', subjectFilter || '없음');
+            
+            let query = window.supabaseClient
+                .from('comments')
+                .select('*')
+                .order('created_at', { ascending: false });
+            
+            // 과목 필터 적용
+            if (subjectFilter) {
+                query = query.eq('subject', subjectFilter);
+            }
+            
+            const { data, error } = await query;
+            
+            if (error) {
+                console.error('❌ Supabase 에러:', error);
+                console.error('에러 코드:', error.code);
+                console.error('에러 메시지:', error.message);
+                console.error('에러 상세:', error.details);
+                throw error;
+            }
+            
+            console.log('✅ 전체 리뷰 조회 성공:', data?.length || 0, '개');
+            if (data && data.length > 0) {
+                console.log('첫 번째 리뷰 샘플:', data[0]);
+            }
+            return { success: true, data: data || [] };
+        } catch (error) {
+            console.error('❌ getAllPublic 에러:', error);
+            return { success: false, error: error.message };
+        }
+    },
+
+    // Get all comments for current user (legacy - 기존 호환성 유지)
     async getAll() {
         try {
             console.log('Fetching comments for current user...');

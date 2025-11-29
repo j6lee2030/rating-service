@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>리뷰 - CI Rating Service</title>
+    <link rel="stylesheet" href="../static/styles.css">
+</head>
+<body class="with-subjects-bg">
+    <!-- 헤더 네비게이션 -->
+    <header class="header">
+        <a href="index.html" class="logo-wrapper">
+            <img src="../static/logo.jpg" alt="CI Logo" class="logo">
+            <span class="logo-text">CI Rating</span>
+        </a>
+        <nav class="header-menu">
+            <a href="index.html">홈</a>
+            <a href="subjects.html">평가하기</a>
+            <button id="logout-btn" onclick="window.logout()">로그아웃</button>
+        </nav>
+    </header>
+
+    <!-- 페이지 로더 -->
+    <div class="page-loader-overlay" id="page-loader">
+        <div class="loader"></div>
+    </div>
+
+    <!-- 리뷰 페이지 컨테이너 -->
+    <div class="reviews-page">
+        <!-- 페이지 헤더 -->
+        <div class="page-header">
+            <h1>📚 과목별 리뷰</h1>
+            <p>모든 과목의 리뷰를 한눈에 확인하세요</p>
+        </div>
+
+        <!-- 탭 네비게이션 -->
+        <div class="review-tabs">
+            <button class="review-tab active" data-tab="all">전체 리뷰</button>
+            <button class="review-tab" data-tab="my">내 리뷰</button>
+        </div>
+
+        <!-- 필터 영역 -->
+        <div class="filter-bar">
+            <div class="filter-group">
+                <label>과목 필터:</label>
+                <select id="subject-filter">
+                    <option value="">전체 과목</option>
+                </select>
+            </div>
+            <div class="review-stats" id="review-stats">
+                총 <strong>0</strong>개의 리뷰
+            </div>
+        </div>
+
+        <!-- 전체 리뷰 탭 -->
+        <div class="tab-panel active" id="panel-all">
+            <!-- 과목별 그룹 -->
+            <div class="subjects-grid" id="subjects-grid">
+                <!-- 동적으로 생성됨 -->
+            </div>
+        </div>
+
+        <!-- 내 리뷰 탭 -->
+        <div class="tab-panel" id="panel-my">
+            <div class="my-reviews-list" id="my-reviews-list">
+                <!-- 동적으로 생성됨 -->
+            </div>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="../static/db.js"></script>
+    <script src="../static/main.js"></script>
+    <script>
+        // 과목 목록
+        const SUBJECTS = [
+            { value: 'Math', label: 'Math (수학)', icon: '🔢' },
+            { value: 'Science', label: 'Science (과학)', icon: '🔬' },
+            { value: 'English and Literature', label: 'English and Literature (영어)', icon: '📖' },
+            { value: 'Individuals and Societies', label: 'Individuals and Societies (사회)', icon: '🌍' },
+            { value: 'Design', label: 'Design (디자인)', icon: '🎨' },
+            { value: 'Chinese', label: 'Chinese (중국어)', icon: '🇨🇳' },
+            { value: 'Korean', label: 'Korean (국어)', icon: '🇰🇷' },
+            { value: 'Spanish', label: 'Spanish (스페인어)', icon: '🇪🇸' },
+            { value: 'Strings', label: 'Strings (현악)', icon: '🎻' },
+            { value: 'Piano & Guitar', label: 'Piano & Guitar (피아노 & 기타)', icon: '🎹' },
+            { value: 'Vocal music', label: 'Vocal music (성악)', icon: '🎤' },
+            { value: 'Media Arts', label: 'Media Arts (미디어 아트)', icon: '🎬' }
+        ];
+
+        let currentUserId = null;
+        let allReviews = [];
+        let myReviews = [];
+
+        // 로그인 확인 및 초기화
+        document.addEventListener('DOMContentLoaded', async function() {
+            const pageLoader = document.getElementById('page-loader');
+            pageLoader.style.display = 'flex';
+
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            if (window.auth) {
+                const isValid = await window.auth.checkSessionValidity();
+                if (!isValid) {
+                    alert('로그인이 필요합니다');
+                    window.location.href = 'login.html';
+                    return;
+                }
+                
+                currentUser = await window.auth.getCurrentUser();
+                if (!currentUser) {
+                    alert('로그인이 필요합니다');
+                    window.location.href = 'login.html';
+                    return;
+                }
+                
+                currentUserId = currentUser.id;
+                console.log('✅ 로그인 확인됨:', currentUser.email);
+            } else {
+                alert('인증 시스템을 사용할 수 없습니다');
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // 필터 옵션 초기화
+            initFilters();
+            
+            // 탭 이벤트 설정
+            setupTabs();
+            
+            // 데이터 로드
+            await loadAllData();
+            
+            pageLoader.style.display = 'none';
+        });
+
+        // 필터 초기화
+        function initFilters() {
+            const filterSelect = document.getElementById('subject-filter');
+            SUBJECTS.forEach(subject => {
+                const option = document.createElement('option');
+                option.value = subject.value;
+                option.textContent = subject.label;
+                filterSelect.appendChild(option);
+            });
+
+            filterSelect.addEventListener('change', () => {
+                renderCurrentTab();
+            });
+        }
+
+        // 탭 설정
+        function setupTabs() {
+            const tabs = document.querySelectorAll('.review-tab');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    
+                    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+                    document.getElementById('panel-' + tab.dataset.tab).classList.add('active');
+                    
+                    renderCurrentTab();
+                });
+            });
+        }
+
+        // 전체 데이터 로드
+        async function loadAllData() {
+            try {
+                console.log('📥 데이터 로드 시작...');
+                console.log('현재 사용자 ID:', currentUserId);
+                
+                // 전체 리뷰 로드
+                const allResult = await window.comments.getAllPublic();
+                console.log('전체 리뷰 결과:', allResult);
+                
+                if (allResult.success) {
+                    allReviews = allResult.data || [];
+                    console.log(`✅ 전체 리뷰 ${allReviews.length}개 로드됨`);
+                } else {
+                    console.error('❌ 전체 리뷰 로드 실패:', allResult.error);
+                }
+
+                // 내 리뷰는 전체 리뷰에서 필터링 (user_id가 없는 기존 데이터 호환)
+                myReviews = allReviews.filter(r => r.user_id === currentUserId);
+                console.log(`✅ 내 리뷰 ${myReviews.length}개 필터됨`);
+
+                renderCurrentTab();
+            } catch (error) {
+                console.error('❌ 데이터 로드 오류:', error);
+            }
+        }
+
+        // 현재 탭 렌더링
+        function renderCurrentTab() {
+            const activeTab = document.querySelector('.review-tab.active').dataset.tab;
+            const filterValue = document.getElementById('subject-filter').value;
+
+            if (activeTab === 'all') {
+                renderAllReviews(filterValue);
+            } else {
+                renderMyReviews(filterValue);
+            }
+        }
+
+        // 전체 리뷰 렌더링 (과목별 그룹)
+        function renderAllReviews(filterValue) {
+            const container = document.getElementById('subjects-grid');
+            const statsEl = document.getElementById('review-stats');
+            
+            let filteredReviews = allReviews;
+            if (filterValue) {
+                filteredReviews = allReviews.filter(r => r.subject === filterValue);
+            }
+
+            statsEl.innerHTML = `총 <strong>${filteredReviews.length}</strong>개의 리뷰`;
+
+            if (filteredReviews.length === 0) {
+                container.innerHTML = '<div class="no-reviews">아직 작성된 리뷰가 없습니다.</div>';
+                return;
+            }
+
+            // 과목별로 그룹화
+            const groupedBySubject = {};
+            SUBJECTS.forEach(s => {
+                groupedBySubject[s.value] = { ...s, reviews: [] };
+            });
+            
+            filteredReviews.forEach(review => {
+                if (groupedBySubject[review.subject]) {
+                    groupedBySubject[review.subject].reviews.push(review);
+                }
+            });
+
+            // 렌더링
+            let html = '';
+            
+            if (filterValue) {
+                // 필터 적용 시 단일 과목 표시
+                const subjectData = groupedBySubject[filterValue];
+                if (subjectData && subjectData.reviews.length > 0) {
+                    html = renderSubjectCard(subjectData, true);
+                }
+            } else {
+                // 전체 과목 그리드
+                Object.values(groupedBySubject).forEach(subjectData => {
+                    if (subjectData.reviews.length > 0) {
+                        html += renderSubjectCard(subjectData, false);
+                    }
+                });
+            }
+
+            container.innerHTML = html || '<div class="no-reviews">아직 작성된 리뷰가 없습니다.</div>';
+        }
+
+        // 과목 카드 렌더링
+        function renderSubjectCard(subjectData, expanded) {
+            const reviews = subjectData.reviews;
+            const avgDifficulty = (reviews.reduce((a, r) => a + r.difficulty, 0) / reviews.length).toFixed(1);
+            const avgLecture = (reviews.reduce((a, r) => a + r.lecture_style, 0) / reviews.length).toFixed(1);
+            const avgEngaging = (reviews.reduce((a, r) => a + r.engaging_level, 0) / reviews.length).toFixed(1);
+
+            let reviewsHtml = '';
+            const displayReviews = expanded ? reviews : reviews.slice(0, 3);
+            
+            displayReviews.forEach(review => {
+                const isMyReview = review.user_id === currentUserId;
+                reviewsHtml += renderReviewItem(review, isMyReview);
+            });
+
+            const moreCount = reviews.length - 3;
+            const showMoreBtn = !expanded && moreCount > 0 
+                ? `<button class="show-more-btn" onclick="expandSubject('${subjectData.value}')">+${moreCount}개 더보기</button>` 
+                : '';
+
+            return `
+                <div class="subject-card ${expanded ? 'expanded' : ''}">
+                    <div class="subject-header">
+                        <div class="subject-title">
+                            <span class="subject-icon">${subjectData.icon}</span>
+                            <h3>${subjectData.label}</h3>
+                            <span class="review-count">${reviews.length}개</span>
+                        </div>
+                        <div class="subject-averages">
+                            <span class="avg-chip" title="평균 난이도">난이도 ${avgDifficulty}</span>
+                            <span class="avg-chip" title="평균 강의 스타일">강의 ${avgLecture}</span>
+                            <span class="avg-chip" title="평균 흥미도">흥미 ${avgEngaging}</span>
+                        </div>
+                    </div>
+                    <div class="subject-reviews">
+                        ${reviewsHtml}
+                    </div>
+                    ${showMoreBtn}
+                </div>
+            `;
+        }
+
+        // 리뷰 아이템 렌더링
+        function renderReviewItem(review, isMyReview) {
+            const actionsHtml = isMyReview ? `
+                <div class="review-actions">
+                    <button onclick="editReview('${review.id}')" class="edit-btn">수정</button>
+                    <button onclick="deleteReview('${review.id}')" class="delete-btn">삭제</button>
+                </div>
+            ` : '';
+            
+            const myBadge = isMyReview ? '<span class="my-badge">내 리뷰</span>' : '';
+
+            return `
+                <div class="review-item ${isMyReview ? 'my-review' : ''}">
+                    <div class="review-top">
+                        <div class="review-meta">
+                            ${myBadge}
+                            <span class="review-date">${new Date(review.created_at).toLocaleDateString('ko-KR')}</span>
+                        </div>
+                        <div class="review-stars">
+                            <span>난이도 ${'★'.repeat(review.difficulty)}${'☆'.repeat(5-review.difficulty)}</span>
+                            <span>강의 ${'★'.repeat(review.lecture_style)}${'☆'.repeat(5-review.lecture_style)}</span>
+                            <span>흥미 ${'★'.repeat(review.engaging_level)}${'☆'.repeat(5-review.engaging_level)}</span>
+                        </div>
+                    </div>
+                    <div class="review-text">${review.reason}</div>
+                    ${actionsHtml}
+                </div>
+            `;
+        }
+
+        // 과목 확장
+        window.expandSubject = function(subjectValue) {
+            document.getElementById('subject-filter').value = subjectValue;
+            renderCurrentTab();
+        }
+
+        // 내 리뷰 렌더링
+        function renderMyReviews(filterValue) {
+            const container = document.getElementById('my-reviews-list');
+            const statsEl = document.getElementById('review-stats');
+            
+            let filteredReviews = myReviews;
+            if (filterValue) {
+                filteredReviews = myReviews.filter(r => r.subject === filterValue);
+            }
+
+            statsEl.innerHTML = `내 리뷰 <strong>${filteredReviews.length}</strong>개`;
+
+            if (filteredReviews.length === 0) {
+                container.innerHTML = `
+                    <div class="no-reviews">
+                        <p>아직 작성한 리뷰가 없습니다.</p>
+                        <a href="subjects.html" class="write-review-btn">리뷰 작성하기</a>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '';
+            filteredReviews.forEach(review => {
+                const subject = SUBJECTS.find(s => s.value === review.subject);
+                html += `
+                    <div class="my-review-card">
+                        <div class="my-review-header">
+                            <div class="my-review-subject">
+                                <span class="subject-icon">${subject?.icon || '📚'}</span>
+                                <strong>${subject?.label || review.subject}</strong>
+                            </div>
+                            <span class="review-date">${new Date(review.created_at).toLocaleDateString('ko-KR')}</span>
+                        </div>
+                        <div class="my-review-ratings">
+                            <span>난이도 ${'★'.repeat(review.difficulty)}${'☆'.repeat(5-review.difficulty)}</span>
+                            <span>강의 ${'★'.repeat(review.lecture_style)}${'☆'.repeat(5-review.lecture_style)}</span>
+                            <span>흥미 ${'★'.repeat(review.engaging_level)}${'☆'.repeat(5-review.engaging_level)}</span>
+                        </div>
+                        <div class="my-review-text">${review.reason}</div>
+                        <div class="my-review-actions">
+                            <button onclick="editReview('${review.id}')" class="edit-btn">수정</button>
+                            <button onclick="deleteReview('${review.id}')" class="delete-btn">삭제</button>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        // 리뷰 수정
+        window.editReview = async function(reviewId) {
+            // subjects.html로 이동하면서 수정 모드 설정
+            sessionStorage.setItem('editReviewId', reviewId);
+            window.location.href = 'subjects.html';
+        }
+
+        // 리뷰 삭제
+        window.deleteReview = async function(reviewId) {
+            if (!confirm('이 리뷰를 삭제하시겠습니까?')) return;
+            
+            try {
+                const result = await window.comments.delete(reviewId);
+                if (result.success) {
+                    await loadAllData();
+                } else {
+                    alert(result.error || '삭제 실패');
+                }
+            } catch (error) {
+                console.error('삭제 오류:', error);
+                alert('네트워크 오류');
+            }
+        }
+    </script>
+</body>
+</html>
+
