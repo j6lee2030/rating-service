@@ -4,220 +4,61 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CI Rating Service</title>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Crimson+Text&family=Didact+Gothic&display=swap');
-
-        body {
-            font-family: 'Didact Gothic', sans-serif; 
-            margin: 0;
-            padding: 0;
-            color: #333;
-            background-image: url('../static/bg.jpg');
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
-            min-height: 100vh;
-            position: relative;
-            overflow-x: hidden;
-        }
-
-        body::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: url('../static/bg.jpg');
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
-            filter: blur(5px);
-            z-index: -1;
-        }
-
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 20px;
-            background-color: rgba(255, 255, 255, 0.8);
-            border-bottom: 1px solid #ddd;
-            position: relative;
-            z-index: 1;
-        }
-        .header .logo {
-            height: 50px;
-        }
-        .header-menu {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-        
-        .header-menu a, .header-menu button {
-            text-decoration: none;
-            color: navy;
-            font-weight: bold;
-            padding: 8px 15px;
-            border-radius: 5px;
-            background-color: rgba(255, 255, 255, 0.7);
-            border: 1px solid navy;
-            transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
-            font-family: 'Didact Gothic', sans-serif;
-            font-size: 1em;
-            cursor: pointer;
-        }
-
-        .header-menu a:hover, .header-menu button:hover {
-            color: #002244;
-            transform: translateY(-3px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-        }
-
-        .main-content {
-            text-align: center;
-            padding: 50px 20px;
-            max-width: 800px;
-            margin: 20px auto;
-            background-color: rgba(255, 255, 255, 0.9);
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            position: relative;
-            z-index: 1;
-        }
-        
-        .welcome-title {
-            font-family: 'Crimson Text', serif;
-            font-weight: normal;
-            font-size: 2.5em;
-            color: navy;
-        }
-
-        .item-list h2 {
-            font-family: 'Crimson Text', serif;
-        }
-
-        /* Login page styles */
-        .login-link-btn {
-            display: inline-block;
-            margin-top: 25px;
-            padding: 10px 25px;
-            background-color: navy;
-            color: white;
-            text-decoration: none;
-            border-radius: 5px;
-            font-weight: bold;
-            transition: transform 0.2s, background-color 0.2s;
-        }
-
-        .login-link-btn:hover {
-            background-color: #0000a0;
-            transform: translateY(-2px);
-        }
-
-        .welcome-message {
-            margin-top: 10px;
-            color: #666;
-            font-size: 0.9em;
-            font-style: italic;
-            text-align: center;
-        }
-
-        /* Menu styles */
-        .menu-overlay {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
-            display: flex;
-            justify-content: center;
-            align-items: flex-end;
-            z-index: 1001;
-            visibility: hidden;
-            opacity: 0;
-            transition: visibility 0.3s, opacity 0.3s ease;
-        }
-
-        .grade-menu {
-            background-color: white;
-            width: 100%;
-            max-width: 600px;
-            padding: 30px;
-            border-radius: 20px 20px 0 0;
-            box-shadow: 0 -5px 15px rgba(0,0,0,0.2);
-            text-align: center;
-            transform: translateY(100%);
-            transition: transform 0.3s ease-out;
-        }
-
-        .menu-overlay.visible {
-            visibility: visible;
-            opacity: 1;
-        }
-
-        .menu-overlay.visible .grade-menu {
-            transform: translateY(0);
-        }
-
-        .grade-menu h3 {
-            margin-top: 0;
-            font-size: 1.5em;
-        }
-
-        .grade-menu a {
-            display: block;
-            text-decoration: none;
-            color: navy;
-            font-size: 1.2em;
-            padding: 15px;
-            margin: 10px 0;
-            border-radius: 10px;
-            background-color: #f0f0f0;
-            transition: background-color 0.2s;
-        }
-
-        .grade-menu a:hover {
-            background-color: #e0e0e0;
-        }
-
-        .close-btn {
-            margin-top: 20px;
-            padding: 10px 25px;
-            border: 1px solid #ccc;
-            background-color: #fff;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 1em;
-        }
-    </style>
+    <link rel="stylesheet" href="../static/styles.css">
 </head>
-<body>
+<body class="with-hero-bg">
+    <!-- 헤더 네비게이션 -->
     <header class="header">
-        <img src="../static/logo.jpg" alt="CI Logo" class="logo">
+        <a href="index.html" class="logo-wrapper">
+            <img src="../static/logo.jpg" alt="CI Logo" class="logo">
+            <span class="logo-text">CI Rating</span>
+        </a>
         <nav class="header-menu">
-            <a href="subjects.html">Subjects</a>
-            <button id="menu-btn">Menu</button>
+            <a href="subjects.html">과목 평가</a>
+            <button id="menu-btn">학년 선택</button>
         </nav>
     </header>
 
-    <div class="main-content">
-        <h1 class="welcome-title">Welcome, CI!</h1>
-        <p>We're here to help you review subjects and facilities.</p>
+    <!-- 히어로 섹션 -->
+    <section class="hero-section">
+        <div class="hero-content">
+            <h1 class="hero-title">CI Rating Service</h1>
+            <p class="hero-subtitle">과목과 시설에 대한 솔직한 리뷰를 남겨주세요</p>
+            <p class="hero-description">여러분의 소중한 피드백이 더 나은 학교를 만듭니다</p>
+            <a href="login.html" class="login-link-btn">시작하기</a>
+        </div>
+        <div class="hero-image">
+            <img src="../static/bg.jpg" alt="School Campus" class="campus-image">
+        </div>
+    </section>
 
-        <a href="login.html" class="login-link-btn">Login</a>
-    </div>
+    <!-- 특징 섹션 -->
+    <section class="features-section">
+        <div class="feature-card">
+            <div class="feature-icon">📚</div>
+            <h3>과목 평가</h3>
+            <p>수업의 난이도, 강의 스타일, 흥미도를 평가하세요</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">⭐</div>
+            <h3>별점 시스템</h3>
+            <p>직관적인 5점 만점 별점으로 쉽게 평가</p>
+        </div>
+        <div class="feature-card">
+            <div class="feature-icon">💬</div>
+            <h3>상세 리뷰</h3>
+            <p>다른 학생들에게 도움이 되는 상세한 리뷰 작성</p>
+        </div>
+    </section>
 
-    <!-- Grade Menu Overlay -->
+    <!-- 학년 선택 메뉴 오버레이 -->
     <div id="grade-menu-overlay" class="menu-overlay">
         <div class="grade-menu">
-            <h3>Select Grade</h3>
+            <h3>학년 선택</h3>
             <a href="#">Grade 6</a>
             <a href="#">Grade 7</a>
             <a href="#">Grade 8</a>
-            <button id="close-menu-btn" class="close-btn">Close</button>
+            <button id="close-menu-btn" class="close-btn">닫기</button>
         </div>
     </div>
 

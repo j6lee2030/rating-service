@@ -3,304 +3,96 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Subjects - CI Rating Service</title>
-    <style>
-        body {
-            font-family: 'Didact Gothic', sans-serif;
-            margin: 0;
-            padding: 20px;
-            background-color: #f0f0f0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            position: relative;
-        }
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: url('../static/subjects.jpg');
-            background-size: cover;
-            background-position: center;
-            filter: blur(5px);
-            z-index: -1;
-        }
-        .main-box {
-            width: 100%;
-            max-width: 600px;
-            height: 680px;
-            background-color: rgba(255, 255, 255, 0.85);
-            backdrop-filter: blur(2px);
-            border: 2px solid #ccc;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 30px;
-            box-sizing: border-box;
-            position: relative;
-            z-index: 1;
-        }
-        
-        .custom-dropdown {
-            width: 100%;
-            position: relative;
-            margin-bottom: 20px;
-        }
-        .dropdown-select {
-            width: 100%;
-            padding: 15px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            background-color: #fff;
-            cursor: pointer;
-            text-align: center;
-            font-size: 1.2em;
-            font-family: 'Crimson Text', serif;
-            box-sizing: border-box;
-            position: relative;
-            font-weight: bold;
-        }
-        .dropdown-select::after {
-            content: '';
-            position: absolute;
-            right: 20px;
-            top: 50%;
-            transform: translateY(-50%);
-            border-left: 6px solid transparent;
-            border-right: 6px solid transparent;
-            border-top: 8px solid #555;
-            transition: transform 0.3s ease;
-        }
-        .dropdown-select.open::after {
-            transform: translateY(-50%) rotate(180deg);
-        }
-        .dropdown-list {
-            width: 100%;
-            max-height: 250px;
-            overflow-y: auto;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            background-color: #fff;
-            position: absolute;
-            top: 100%;
-            left: 0;
-            z-index: 10;
-            display: none;
-            margin-top: 5px;
-        }
-        .dropdown-list div {
-            padding: 12px 15px;
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-        .dropdown-list div:hover {
-            background-color: #f0f0f0;
-        }
-        
-        .rating-content {
-            display: none;
-            width: 100%;
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-        }
-        .rating-system {
-            width: 100%;
-            flex-grow: 1;
-        }
-        .rating-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            width: 100%;
-            margin-bottom: 10px;
-        }
-        .rating-label {
-            font-size: 1.1em;
-            font-weight: bold;
-            color: #555;
-            text-align: left;
-            flex: 1;
-            font-family: 'Didact Gothic', sans-serif;
-        }
-        .stars {
-            font-size: 1em;
-            cursor: pointer;
-            display: flex;
-            gap: 2px;
-        }
-        .star {
-            color: gray;
-        }
-        .star.active {
-            color: gold;
-        }
-        
-        .form-bottom {
-            width: 100%;
-        }
-        .reason-box textarea {
-            font-family: 'Didact Gothic', sans-serif;
-            width: 100%;
-            height: 150px;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            resize: none;
-            box-sizing: border-box;
-        }
-        .submit-button {
-            font-family: 'Didact Gothic', sans-serif;
-            width: 100%;
-            padding: 10px;
-            margin-top: 10px;
-            border: none;
-            border-radius: 5px;
-            background-color: navy;
-            color: white;
-            font-size: 1.1em;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        .back-button {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            text-decoration: none;
-            color: navy;
-            font-size: 1.2em;
-            font-weight: bold;
-            font-family: 'Didact Gothic', sans-serif;
-            background-color: white;
-            padding: 10px 20px;
-            border-radius: 5px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
-            z-index: 1000;
-        }
-        .validation-message {
-            color: red;
-            font-size: 0.9em;
-            text-align: center;
-            display: none;
-            margin-top: 5px;
-        }
-        .submitted-message {
-            font-size: 1.2em;
-            color: green;
-            font-weight: bold;
-            text-align: center;
-            display: none;
-        }
-        
-        /* Generic loader styles */
-        .loader {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid navy;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-
-        /* Styles for the loader inside the main box */
-        #submit-loader {
-            width: 40px;
-            height: 40px;
-            margin: 20px auto;
-            display: none; /* Hidden by default */
-        }
-        
-        /* Styles for the full-page loader */
-        .page-loader-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(255, 255, 255, 0.7);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: 2000;
-        }
-        .page-loader-overlay .loader {
-            width: 60px;
-            height: 60px;
-        }
-
-    </style>
+    <title>과목 평가 - CI Rating Service</title>
+    <link rel="stylesheet" href="../static/styles.css">
 </head>
-<body>
+<body class="with-subjects-bg">
+    <!-- 헤더 네비게이션 -->
+    <header class="header">
+        <a href="index.html" class="logo-wrapper">
+            <img src="../static/logo.jpg" alt="CI Logo" class="logo">
+            <span class="logo-text">CI Rating</span>
+        </a>
+        <nav class="header-menu">
+            <a href="index.html">홈</a>
+            <button id="logout-btn" onclick="logout()">로그아웃</button>
+        </nav>
+    </header>
 
+    <!-- 페이지 로더 -->
     <div class="page-loader-overlay">
         <div class="loader"></div>
     </div>
 
-    <a href="index.html" class="back-button">← Back to Home</a>
-
+    <!-- 메인 평가 박스 -->
     <div class="main-box">
+        <!-- 과목 선택 드롭다운 -->
         <div class="custom-dropdown">
-            <div class="dropdown-select">Click the subject</div>
+            <div class="dropdown-select">과목을 선택하세요</div>
             <div class="dropdown-list">
-                <div data-value="Math">Math</div>
-                <div data-value="Science">Science</div>
-                <div data-value="English and Literature">English and Literature</div>
-                <div data-value="Individuals and Societies">Individuals and Societies</div>
-                <div data-value="Design">Design</div>
-                <div data-value="Chinese">Chinese</div>
-                <div data-value="Korean">Korean</div>
-                <div data-value="Spanish">Spanish</div>
-                <div data-value="Strings">Strings</div>
-                <div data-value="Piano & Guitar">Piano & Guitar</div>
-                <div data-value="Vocal music">Vocal music</div>
-                <div data-value="Media Arts">Media Arts</div>
+                <div data-value="Math">Math (수학)</div>
+                <div data-value="Science">Science (과학)</div>
+                <div data-value="English and Literature">English and Literature (영어)</div>
+                <div data-value="Individuals and Societies">Individuals and Societies (사회)</div>
+                <div data-value="Design">Design (디자인)</div>
+                <div data-value="Chinese">Chinese (중국어)</div>
+                <div data-value="Korean">Korean (국어)</div>
+                <div data-value="Spanish">Spanish (스페인어)</div>
+                <div data-value="Strings">Strings (현악)</div>
+                <div data-value="Piano & Guitar">Piano & Guitar (피아노 & 기타)</div>
+                <div data-value="Vocal music">Vocal music (성악)</div>
+                <div data-value="Media Arts">Media Arts (미디어 아트)</div>
             </div>
         </div>
 
+        <!-- 평점 입력 영역 -->
         <div class="rating-content">
             <div class="rating-system">
                 <div class="rating-row">
-                    <span class="rating-label">Difficulty</span>
+                    <span class="rating-label">난이도</span>
                     <div class="stars" data-rating-type="difficulty">
-                        <span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span>
+                        <span class="star">★</span>
+                        <span class="star">★</span>
+                        <span class="star">★</span>
+                        <span class="star">★</span>
+                        <span class="star">★</span>
                     </div>
                 </div>
                 <div class="rating-row">
-                    <span class="rating-label">Lecture Style</span>
+                    <span class="rating-label">강의 스타일</span>
                     <div class="stars" data-rating-type="lecture_style">
-                        <span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span>
+                        <span class="star">★</span>
+                        <span class="star">★</span>
+                        <span class="star">★</span>
+                        <span class="star">★</span>
+                        <span class="star">★</span>
                     </div>
                 </div>
                 <div class="rating-row">
-                    <span class="rating-label">Engaging level</span>
+                    <span class="rating-label">흥미도</span>
                     <div class="stars" data-rating-type="engaging_level">
-                        <span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span>
+                        <span class="star">★</span>
+                        <span class="star">★</span>
+                        <span class="star">★</span>
+                        <span class="star">★</span>
+                        <span class="star">★</span>
                     </div>
                 </div>
             </div>
             
+            <!-- 리뷰 작성 -->
             <div class="form-bottom">
                 <div class="reason-box">
-                    <p>Reason:</p>
-                    <textarea placeholder="Enter your reason here..."></textarea>
-                    <div class="validation-message">Please type something.</div>
+                    <p>상세 리뷰</p>
+                    <textarea placeholder="이 과목에 대한 솔직한 의견을 작성해주세요..."></textarea>
+                    <div class="validation-message">리뷰 내용을 입력해주세요.</div>
                 </div>
-                <button class="submit-button">Submit answer</button>
+                <button class="submit-button">제출하기</button>
             </div>
             
-            <!-- ADDED ID HERE -->
+            <!-- 로딩 & 완료 메시지 -->
             <div class="loader" id="submit-loader"></div>
-            <div class="submitted-message">Answer submitted</div>
+            <div class="submitted-message">리뷰가 제출되었습니다!</div>
         </div>
     </div>
 
@@ -308,28 +100,28 @@
     <script src="../static/db.js"></script>
     <script src="../static/main.js"></script>
     <script>
-        // Check if user is logged in
+        // 로그인 확인
         document.addEventListener('DOMContentLoaded', async function() {
-            // Wait a bit for auth state to be loaded
+            // 인증 상태 로드 대기
             await new Promise(resolve => setTimeout(resolve, 500));
             
-            // Check authentication state properly
+            // 인증 상태 확인
             if (window.auth) {
                 const isValid = await window.auth.checkSessionValidity();
                 if (!isValid) {
-                    alert('Please login first');
+                    alert('로그인이 필요합니다');
                     window.location.href = 'login.html';
                     return;
                 }
                 
                 currentUser = await window.auth.getCurrentUser();
                 if (!currentUser) {
-                    alert('Please login first');
+                    alert('로그인이 필요합니다');
                     window.location.href = 'login.html';
                     return;
                 }
             } else {
-                alert('Authentication not available. Please login first');
+                alert('인증 시스템을 사용할 수 없습니다. 로그인해주세요');
                 window.location.href = 'login.html';
                 return;
             }
@@ -341,49 +133,42 @@
         const dropdownList = document.querySelector('.dropdown-list');
         const ratingContent = document.querySelector('.rating-content');
         const submitButton = document.querySelector('.submit-button');
-        const backButton = document.querySelector('.back-button');
         const pageLoaderOverlay = document.querySelector('.page-loader-overlay');
-
-        backButton.addEventListener('click', (event) => {
-            event.preventDefault();
-            pageLoaderOverlay.style.display = 'flex';
-
-            setTimeout(() => {
-                window.location.href = event.target.href;
-            }, 1000);
-        });
         
+        // 드롭다운 토글
         dropdownSelect.addEventListener('click', () => {
             const isVisible = dropdownList.style.display === 'block';
             dropdownList.style.display = isVisible ? 'none' : 'block';
             dropdownSelect.classList.toggle('open', !isVisible);
         });
 
+        // 과목 선택
         dropdownList.addEventListener('click', (event) => {
             if (event.target.dataset.value) {
                 const selectedSubject = event.target.dataset.value;
-                dropdownSelect.textContent = selectedSubject;
+                dropdownSelect.textContent = event.target.textContent;
                 currentSubject = selectedSubject;
                 dropdownList.style.display = 'none';
                 dropdownSelect.classList.remove('open');
                 ratingContent.style.display = 'flex';
                 
+                // 폼 초기화
                 document.querySelector('.form-bottom').style.display = 'block';
                 document.querySelector('.submitted-message').style.display = 'none';
                 document.querySelector('#submit-loader').style.display = 'none';
-
                 document.querySelector('.reason-box textarea').value = '';
                 
                 document.querySelectorAll('.star').forEach(star => {
                     star.classList.remove('active');
                 });
                 
-                // Reset editing state
+                // 수정 모드 초기화
                 editingCommentId = null;
-                submitButton.textContent = 'Submit answer';
+                submitButton.textContent = '제출하기';
             }
         });
 
+        // 드롭다운 외부 클릭 시 닫기
         document.addEventListener('click', (event) => {
             if (!dropdownSelect.contains(event.target)) {
                 dropdownList.style.display = 'none';
@@ -391,6 +176,7 @@
             }
         });
 
+        // 별점 클릭
         document.querySelectorAll('.stars').forEach(starsContainer => {
             starsContainer.addEventListener('click', (event) => {
                 if (event.target.classList.contains('star')) {
@@ -403,12 +189,13 @@
             });
         });
 
+        // 제출 버튼 클릭
         submitButton.addEventListener('click', async () => {
-            // Check if user is authenticated
+            // 로그인 확인
             if (!currentUser) {
                 const user = await window.auth.getCurrentUser();
                 if (!user) {
-                    alert('You must be logged in to post. Redirecting to login...');
+                    alert('로그인이 필요합니다');
                     window.location.href = 'login.html';
                     return;
                 }
@@ -416,7 +203,7 @@
             }
 
             if (!currentSubject) {
-                alert('Please select a subject first');
+                alert('과목을 먼저 선택해주세요');
                 return;
             }
 
@@ -434,13 +221,13 @@
                 return;
             }
 
-            // Get ratings
+            // 평점 확인
             const difficulty = getRating('difficulty');
             const lectureStyle = getRating('lecture_style');
             const engagingLevel = getRating('engaging_level');
 
             if (difficulty === 0 || lectureStyle === 0 || engagingLevel === 0) {
-                alert('Please rate all categories');
+                alert('모든 항목에 별점을 매겨주세요');
                 return;
             }
 
@@ -456,14 +243,13 @@
                     result = await window.comments.create(currentSubject, difficulty, lectureStyle, engagingLevel, textarea.value.trim());
                 }
                 
-                // Hide loader immediately when posting completes
                 loader.style.display = 'none';
                 
                 if (result.success) {
                     submittedMessage.style.display = 'block';
                     loadUserComments();
                     
-                    // Reset form
+                    // 폼 초기화
                     setTimeout(() => {
                         submittedMessage.style.display = 'none';
                         formBottom.style.display = 'block';
@@ -472,21 +258,22 @@
                             star.classList.remove('active');
                         });
                         editingCommentId = null;
-                        submitButton.textContent = 'Submit answer';
+                        submitButton.textContent = '제출하기';
                     }, 2000);
                 } else {
-                    console.error('Post error:', result.error);
-                    alert(result.error || 'Failed to save comment. Please check the console for details.');
+                    console.error('저장 오류:', result.error);
+                    alert(result.error || '저장 실패. 콘솔을 확인해주세요.');
                     formBottom.style.display = 'block';
                 }
             } catch (error) {
-                console.error('Submit error:', error);
+                console.error('제출 오류:', error);
                 loader.style.display = 'none';
-                alert('Network error. Please try again. Check console for details.');
+                alert('네트워크 오류. 다시 시도해주세요.');
                 formBottom.style.display = 'block';
             }
         });
 
+        // 별점 가져오기
         function getRating(type) {
             const stars = document.querySelector(`[data-rating-type="${type}"]`).querySelectorAll('.star');
             let count = 0;
