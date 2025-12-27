@@ -54,6 +54,44 @@
     --transition-normal: 0.25s ease;
 }
 
+/* 다크모드 색상 변수 */
+:root[data-theme="dark"] {
+    /* 메인 컬러 (다크모드에서는 더 밝게) */
+    --primary-color: #60a5fa;      /* 라이트 블루 */
+    --primary-light: #3b82f6;      /* 미디엄 블루 */
+    --primary-dark: #1e40af;       /* 다크 블루 */
+    
+    /* 액센트 컬러 */
+    --accent-color: #3b82f6;       /* 브라이트 블루 */
+    --accent-light: #60a5fa;
+    
+    /* 학년별 색상 (다크모드에서도 유지) */
+    --grade-6-color: #60a5fa;      /* 파랑 - 6학년 */
+    --grade-6-light: #1e3a8a;
+    --grade-7-color: #34d399;      /* 초록 - 7학년 */
+    --grade-7-light: #065f46;
+    --grade-8-color: #a78bfa;      /* 보라 - 8학년 */
+    --grade-8-light: #5b21b6;
+    
+    /* 배경 컬러 */
+    --bg-primary: #0f172a;         /* 다크 배경 */
+    --bg-secondary: #1e293b;      /* 다크 카드 배경 */
+    --bg-card: #1e293b;           /* 다크 카드 */
+    
+    /* 텍스트 컬러 */
+    --text-primary: #f1f5f9;      /* 밝은 텍스트 */
+    --text-secondary: #cbd5e1;    /* 중간 텍스트 */
+    --text-muted: #94a3b8;        /* 약한 텍스트 */
+    
+    /* 보더 */
+    --border-color: #334155;      /* 다크 보더 */
+    
+    /* 그림자 (다크모드에서는 더 강하게) */
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.5);
+}
+
 /* 폰트 로드 - Pretendard (한글/영문 모두 깔끔) */
 @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable.min.css');
 
@@ -62,6 +100,21 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
+}
+
+/* 다크모드 전환을 위한 트랜지션 (주요 요소에만 적용) */
+body, 
+.header, 
+.main-box, 
+.review-item, 
+.subject-card, 
+.feature-card, 
+.guideline-card,
+.login-container,
+.custom-dropdown,
+.dropdown-select,
+.dropdown-list {
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }
 
 /* Body 스타일 */
@@ -97,6 +150,17 @@ body.with-hero-bg::before {
     z-index: 0;
 }
 
+/* 다크모드 배경 이미지 오버레이 */
+:root[data-theme="dark"] body.with-hero-bg {
+    background: linear-gradient(135deg, var(--bg-primary) 0%, #0a0e1a 100%);
+}
+
+:root[data-theme="dark"] body.with-hero-bg::before {
+    background: 
+        linear-gradient(180deg, rgba(15, 23, 42, 0.85) 0%, rgba(15, 23, 42, 0.75) 50%, rgba(15, 23, 42, 0.85) 100%),
+        url('bg.jpg');
+}
+
 /* 과목 페이지용 배경 */
 body.with-subjects-bg::before {
     content: '';
@@ -113,6 +177,13 @@ body.with-subjects-bg::before {
     background-attachment: fixed;
     pointer-events: none;
     z-index: 0;
+}
+
+/* 다크모드 과목 페이지 배경 오버레이 */
+:root[data-theme="dark"] body.with-subjects-bg::before {
+    background: 
+        linear-gradient(180deg, rgba(15, 23, 42, 0.88) 0%, rgba(15, 23, 42, 0.82) 100%),
+        url('subjects.jpg');
 }
 
 /* ========================================
@@ -201,6 +272,32 @@ body.with-subjects-bg::before {
 .header-menu .btn-primary:hover {
     background-color: var(--primary-light);
     color: white;
+}
+
+/* 다크모드 토글 버튼 */
+.dark-mode-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    font-size: 1.2rem;
+    background-color: transparent;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-sm);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.dark-mode-toggle:hover {
+    background-color: var(--bg-primary);
+    border-color: var(--accent-color);
+    transform: scale(1.05);
+}
+
+.dark-mode-toggle:active {
+    transform: scale(0.95);
 }
 
 /* 로그아웃 버튼 */
@@ -994,6 +1091,31 @@ body.with-subjects-bg .main-box {
     color: white;
 }
 
+/* 다크모드 버튼 스타일 */
+:root[data-theme="dark"] .edit-btn {
+    color: var(--accent-color);
+    background-color: rgba(59, 130, 246, 0.15);
+    border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+:root[data-theme="dark"] .edit-btn:hover {
+    background-color: var(--accent-color);
+    color: white;
+    border-color: var(--accent-color);
+}
+
+:root[data-theme="dark"] .delete-btn {
+    color: #f87171;
+    background-color: rgba(248, 113, 113, 0.15);
+    border: 1px solid rgba(248, 113, 113, 0.3);
+}
+
+:root[data-theme="dark"] .delete-btn:hover {
+    background-color: #f87171;
+    color: white;
+    border-color: #f87171;
+}
+
 /* ========================================
    반응형 디자인
    ======================================== */
@@ -1229,10 +1351,27 @@ body.with-subjects-bg .main-box {
     box-shadow: var(--shadow-sm);
 }
 
+/* 다크모드 리뷰 아이템 */
+:root[data-theme="dark"] .review-item {
+    background-color: var(--bg-secondary);
+    border-color: rgba(59, 130, 246, 0.2);
+}
+
+:root[data-theme="dark"] .review-item:hover {
+    border-color: rgba(59, 130, 246, 0.4);
+    box-shadow: var(--shadow-md);
+}
+
 /* 내 리뷰 스타일 */
 .review-item.my-review {
     background-color: #ebf8ff;
     border-color: var(--accent-light);
+}
+
+/* 다크모드 내 리뷰 스타일 */
+:root[data-theme="dark"] .review-item.my-review {
+    background-color: rgba(59, 130, 246, 0.15);
+    border-color: rgba(59, 130, 246, 0.4);
 }
 
 .review-header {
@@ -1371,6 +1510,12 @@ body.with-subjects-bg .main-box {
     color: white;
 }
 
+/* 다크모드 페이지 헤더 */
+:root[data-theme="dark"] .page-header {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
+    box-shadow: 0 4px 16px rgba(59, 130, 246, 0.3);
+}
+
 .page-header h1 {
     font-size: 2rem;
     font-weight: 700;
@@ -1391,6 +1536,13 @@ body.with-subjects-bg .main-box {
     padding: var(--spacing-xs);
     border-radius: var(--border-radius);
     box-shadow: var(--shadow-sm);
+}
+
+/* 다크모드 리뷰 탭 */
+:root[data-theme="dark"] .review-tabs {
+    background-color: var(--bg-card);
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    box-shadow: var(--shadow-md);
 }
 
 .review-tab {
@@ -1431,6 +1583,13 @@ body.with-subjects-bg .main-box {
     gap: var(--spacing-md);
 }
 
+/* 다크모드 필터 바 */
+:root[data-theme="dark"] .filter-bar {
+    background-color: var(--bg-card);
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    box-shadow: var(--shadow-md);
+}
+
 .filter-group {
     display: flex;
     align-items: center;
@@ -1455,6 +1614,18 @@ body.with-subjects-bg .main-box {
     min-width: 200px;
 }
 
+/* 다크모드 필터 select */
+:root[data-theme="dark"] .filter-group select {
+    background-color: var(--bg-secondary);
+    border-color: rgba(59, 130, 246, 0.3);
+    color: var(--text-primary);
+}
+
+:root[data-theme="dark"] .filter-group select:focus {
+    border-color: var(--accent-color);
+    outline: none;
+}
+
 .review-stats {
     font-size: 0.9rem;
     color: var(--text-muted);
@@ -1462,6 +1633,15 @@ body.with-subjects-bg .main-box {
 
 .review-stats strong {
     color: var(--primary-color);
+}
+
+/* 다크모드 리뷰 통계 */
+:root[data-theme="dark"] .review-stats {
+    color: var(--text-primary);
+}
+
+:root[data-theme="dark"] .review-stats strong {
+    color: var(--accent-color);
 }
 
 /* 탭 패널 */
@@ -1488,10 +1668,27 @@ body.with-subjects-bg .main-box {
     overflow: hidden;
 }
 
+/* 다크모드 과목 카드 */
+:root[data-theme="dark"] .subject-card {
+    background-color: var(--bg-card);
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    box-shadow: var(--shadow-lg);
+}
+
+:root[data-theme="dark"] .subject-card:hover {
+    border-color: rgba(59, 130, 246, 0.4);
+}
+
 .subject-header {
     padding: var(--spacing-lg);
-    background: linear-gradient(135deg, var(--bg-primary) 0%, #e8f4fd 100%);
+    background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
     border-bottom: 1px solid var(--border-color);
+}
+
+/* 다크모드 과목 헤더 */
+:root[data-theme="dark"] .subject-header {
+    background: linear-gradient(135deg, var(--bg-primary) 0%, #1e293b 100%);
+    border-bottom: 1px solid rgba(59, 130, 246, 0.2);
 }
 
 .subject-title {
@@ -1512,12 +1709,23 @@ body.with-subjects-bg .main-box {
     margin: 0;
 }
 
+/* 다크모드 과목 제목 */
+:root[data-theme="dark"] .subject-title h3 {
+    color: var(--text-primary);
+}
+
 .review-count {
     font-size: 0.8rem;
     padding: 2px 8px;
     background-color: var(--accent-color);
     color: white;
     border-radius: 10px;
+}
+
+/* 다크모드 리뷰 카운트 배지 */
+:root[data-theme="dark"] .review-count {
+    background-color: var(--accent-color);
+    box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
 }
 
 .subject-averages {
@@ -1529,10 +1737,17 @@ body.with-subjects-bg .main-box {
 .avg-chip {
     font-size: 0.75rem;
     padding: 4px 10px;
-    background-color: white;
+    background-color: var(--bg-card);
     color: var(--text-secondary);
     border-radius: 20px;
     border: 1px solid var(--border-color);
+}
+
+/* 다크모드 평균 칩 */
+:root[data-theme="dark"] .avg-chip {
+    background-color: rgba(59, 130, 246, 0.1);
+    border-color: rgba(59, 130, 246, 0.3);
+    color: var(--text-primary);
 }
 
 /* 과목 내 리뷰 목록 */
@@ -1548,8 +1763,20 @@ body.with-subjects-bg .main-box {
     border-left: 3px solid var(--border-color);
 }
 
+/* 다크모드 과목 내 리뷰 아이템 */
+:root[data-theme="dark"] .subject-reviews .review-item {
+    background-color: var(--bg-secondary);
+    border-left-color: rgba(59, 130, 246, 0.3);
+}
+
 .subject-reviews .review-item.my-review {
     background-color: #ebf8ff;
+    border-left-color: var(--accent-color);
+}
+
+/* 다크모드 과목 내 내 리뷰 스타일 */
+:root[data-theme="dark"] .subject-reviews .review-item.my-review {
+    background-color: rgba(59, 130, 246, 0.15);
     border-left-color: var(--accent-color);
 }
 
@@ -1581,6 +1808,15 @@ body.with-subjects-bg .main-box {
     line-height: 1.6;
 }
 
+/* 다크모드 리뷰 텍스트 */
+:root[data-theme="dark"] .review-text {
+    color: var(--text-primary);
+}
+
+:root[data-theme="dark"] .review-stars {
+    color: var(--text-primary);
+}
+
 .show-more-btn {
     display: block;
     width: 100%;
@@ -1597,7 +1833,19 @@ body.with-subjects-bg .main-box {
 }
 
 .show-more-btn:hover {
-    background-color: #e8f4fd;
+    background-color: var(--bg-secondary);
+}
+
+/* 다크모드 더보기 버튼 */
+:root[data-theme="dark"] .show-more-btn {
+    color: var(--accent-color);
+    background-color: var(--bg-primary);
+    border-top-color: rgba(59, 130, 246, 0.3);
+}
+
+:root[data-theme="dark"] .show-more-btn:hover {
+    background-color: rgba(59, 130, 246, 0.15);
+    color: var(--accent-light);
 }
 
 /* 내 리뷰 목록 */
@@ -1613,6 +1861,15 @@ body.with-subjects-bg .main-box {
     border-radius: var(--border-radius);
     box-shadow: var(--shadow-sm);
     border-left: 4px solid var(--accent-color);
+}
+
+/* 다크모드 내 리뷰 카드 */
+:root[data-theme="dark"] .my-review-card {
+    background-color: var(--bg-card);
+    border-left-color: var(--accent-color);
+    box-shadow: var(--shadow-md);
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    border-left-width: 4px;
 }
 
 .my-review-header {
@@ -1634,6 +1891,11 @@ body.with-subjects-bg .main-box {
     color: var(--primary-color);
 }
 
+/* 다크모드 내 리뷰 제목 */
+:root[data-theme="dark"] .my-review-subject strong {
+    color: var(--accent-color);
+}
+
 .my-review-ratings {
     display: flex;
     gap: var(--spacing-md);
@@ -1641,6 +1903,11 @@ body.with-subjects-bg .main-box {
     font-size: 0.85rem;
     color: var(--text-muted);
     flex-wrap: wrap;
+}
+
+/* 다크모드 내 리뷰 평점 */
+:root[data-theme="dark"] .my-review-ratings {
+    color: var(--text-primary);
 }
 
 .my-review-text {
@@ -1651,6 +1918,13 @@ body.with-subjects-bg .main-box {
     color: var(--text-secondary);
     line-height: 1.6;
     margin-bottom: var(--spacing-md);
+}
+
+/* 다크모드 내 리뷰 텍스트 */
+:root[data-theme="dark"] .my-review-text {
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+    border: 1px solid rgba(59, 130, 246, 0.1);
 }
 
 .my-review-actions {
@@ -1664,6 +1938,11 @@ body.with-subjects-bg .main-box {
     text-align: center;
     padding: var(--spacing-2xl);
     color: var(--text-muted);
+}
+
+/* 다크모드 리뷰 없음 메시지 */
+:root[data-theme="dark"] .no-reviews {
+    color: var(--text-secondary);
 }
 
 .write-review-btn {
@@ -1680,6 +1959,17 @@ body.with-subjects-bg .main-box {
 
 .write-review-btn:hover {
     transform: translateY(-2px);
+}
+
+/* 다크모드 리뷰 작성 버튼 */
+:root[data-theme="dark"] .write-review-btn {
+    background: linear-gradient(135deg, var(--accent-color) 0%, var(--primary-light) 100%);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+:root[data-theme="dark"] .write-review-btn:hover {
+    background: linear-gradient(135deg, var(--accent-light) 0%, var(--accent-color) 100%);
+    box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
 }
 
 /* 제출 완료 메시지 내 링크 */
@@ -1810,8 +2100,14 @@ body.with-subjects-bg .main-box {
     position: relative;
     z-index: 1;
     padding: 60px var(--spacing-lg);
-    background: linear-gradient(135deg, var(--bg-primary) 0%, #f8fafc 50%, var(--bg-secondary) 100%);
+    background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-primary) 50%, var(--bg-secondary) 100%);
     margin-top: 48px;
+}
+
+/* 다크모드에서 Guidelines 섹션 배경 개선 */
+:root[data-theme="dark"] .guidelines-section {
+    background: linear-gradient(135deg, var(--bg-primary) 0%, #1a2332 50%, var(--bg-secondary) 100%);
+    border-top: 1px solid var(--border-color);
 }
 
 .guidelines-container {
@@ -1901,6 +2197,12 @@ body.with-subjects-bg .main-box {
     justify-content: center;
 }
 
+/* 다크모드에서 아이콘 배경 개선 */
+:root[data-theme="dark"] .guideline-icon {
+    background: rgba(59, 130, 246, 0.2);
+    border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
 .guideline-card h3 {
     font-size: 1.4rem;
     font-weight: 600;
@@ -1924,6 +2226,39 @@ body.with-subjects-bg .main-box {
     box-shadow: var(--shadow-sm);
     border: 1px solid var(--border-color);
     text-align: center;
+}
+
+/* 다크모드에서 Guidelines 섹션 전체 가시성 개선 */
+:root[data-theme="dark"] .guideline-card {
+    background: var(--bg-card);
+    border: 1px solid rgba(59, 130, 246, 0.3);
+    box-shadow: var(--shadow-md);
+}
+
+:root[data-theme="dark"] .guideline-card:hover {
+    border-color: var(--accent-color);
+    box-shadow: var(--shadow-lg);
+    background: #253449;
+}
+
+:root[data-theme="dark"] .guidelines-footer {
+    background: var(--bg-card);
+    border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+/* 다크모드에서 텍스트 가시성 개선 */
+:root[data-theme="dark"] .guidelines-intro {
+    color: var(--text-primary);
+}
+
+:root[data-theme="dark"] .announcement-title,
+:root[data-theme="dark"] .guidelines-title {
+    color: var(--accent-color);
+    text-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
+}
+
+:root[data-theme="dark"] .guideline-card:hover {
+    background: #253449;
 }
 
 .guidelines-footer p {

@@ -6,6 +6,9 @@ let activityTimer = null;
 
 // Initialize authentication and UI
 document.addEventListener('DOMContentLoaded', function() {
+    // Initialize dark mode first (before other UI elements render)
+    initDarkMode();
+    
     // Test Supabase connection
     if (window.testSupabaseConnection) {
         window.testSupabaseConnection().then(success => {
@@ -25,6 +28,9 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Set up activity tracking
     setupActivityTracking();
+    
+    // Set up dark mode toggle button
+    setupDarkModeToggle();
     
     // Set up auth state listener
     if (window.auth) {
@@ -364,3 +370,57 @@ function updateActivity() {
         window.auth.updateLastActivity();
     }
 }
+
+// Dark Mode Functions
+// Initialize dark mode on page load
+function initDarkMode() {
+    // Check localStorage for saved theme preference
+    const savedTheme = localStorage.getItem('theme');
+    
+    if (savedTheme) {
+        // Use saved preference
+        setTheme(savedTheme);
+    } else {
+        // Check system preference on first visit
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        const theme = prefersDark ? 'dark' : 'light';
+        setTheme(theme);
+    }
+}
+
+// Set theme and save to localStorage
+function setTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('theme', theme);
+    
+    // Update toggle button icon if it exists
+    const toggleBtn = document.querySelector('.dark-mode-toggle');
+    if (toggleBtn) {
+        toggleBtn.textContent = theme === 'dark' ? '☀️' : '🌙';
+        toggleBtn.setAttribute('aria-label', theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
+    }
+}
+
+// Toggle between light and dark mode
+function toggleDarkMode() {
+    const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    setTheme(newTheme);
+}
+
+// Set up dark mode toggle button
+function setupDarkModeToggle() {
+    const toggleBtn = document.querySelector('.dark-mode-toggle');
+    if (toggleBtn) {
+        // Set initial icon based on current theme
+        const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+        toggleBtn.textContent = currentTheme === 'dark' ? '☀️' : '🌙';
+        toggleBtn.setAttribute('aria-label', currentTheme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode');
+        
+        // Add click event listener
+        toggleBtn.addEventListener('click', toggleDarkMode);
+    }
+}
+
+// Make toggleDarkMode globally available
+window.toggleDarkMode = toggleDarkMode;
