@@ -162,6 +162,10 @@ body.with-hero-bg::before {
 }
 
 /* 과목 페이지용 배경 */
+body.with-subjects-bg {
+    background: var(--bg-primary);
+}
+
 body.with-subjects-bg::before {
     content: '';
     position: fixed;
@@ -179,11 +183,18 @@ body.with-subjects-bg::before {
     z-index: 0;
 }
 
-/* 다크모드 과목 페이지 배경 오버레이 */
+/* 다크모드 과목 페이지 배경 */
+:root[data-theme="dark"] body.with-subjects-bg {
+    background: var(--bg-primary);
+}
+
 :root[data-theme="dark"] body.with-subjects-bg::before {
     background: 
         linear-gradient(180deg, rgba(15, 23, 42, 0.88) 0%, rgba(15, 23, 42, 0.82) 100%),
         url('subjects.jpg');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
 }
 
 /* ========================================
