@@ -42,6 +42,15 @@
         <!-- 필터 영역 -->
         <div class="filter-bar">
             <div class="filter-group">
+                <label>학년 필터:</label>
+                <select id="grade-filter">
+                    <option value="">전체 학년</option>
+                    <option value="6">6학년</option>
+                    <option value="7">7학년</option>
+                    <option value="8">8학년</option>
+                </select>
+            </div>
+            <div class="filter-group">
                 <label>과목 필터:</label>
                 <select id="subject-filter">
                     <option value="">전체 과목</option>
@@ -136,15 +145,21 @@
 
         // 필터 초기화
         function initFilters() {
-            const filterSelect = document.getElementById('subject-filter');
+            const subjectFilterSelect = document.getElementById('subject-filter');
+            const gradeFilterSelect = document.getElementById('grade-filter');
+
             SUBJECTS.forEach(subject => {
                 const option = document.createElement('option');
                 option.value = subject.value;
                 option.textContent = subject.label;
-                filterSelect.appendChild(option);
+                subjectFilterSelect.appendChild(option);
             });
 
-            filterSelect.addEventListener('change', () => {
+            subjectFilterSelect.addEventListener('change', () => {
+                renderCurrentTab();
+            });
+
+            gradeFilterSelect.addEventListener('change', () => {
                 renderCurrentTab();
             });
         }
@@ -170,8 +185,8 @@
             try {
                 console.log('📥 데이터 로드 시작...');
                 console.log('현재 사용자 ID:', currentUserId);
-                
-                // 전체 리뷰 로드
+
+                // 전체 리뷰 로드 (필터링 없이)
                 const allResult = await window.comments.getAllPublic();
                 console.log('전체 리뷰 결과:', allResult);
                 
@@ -195,23 +210,31 @@
         // 현재 탭 렌더링
         function renderCurrentTab() {
             const activeTab = document.querySelector('.review-tab.active').dataset.tab;
-            const filterValue = document.getElementById('subject-filter').value;
+            const subjectFilterValue = document.getElementById('subject-filter').value;
+            const gradeFilterValue = document.getElementById('grade-filter').value;
 
             if (activeTab === 'all') {
-                renderAllReviews(filterValue);
+                renderAllReviews(subjectFilterValue, gradeFilterValue);
             } else {
-                renderMyReviews(filterValue);
+                renderMyReviews(subjectFilterValue, gradeFilterValue);
             }
         }
 
         // 전체 리뷰 렌더링 (과목별 그룹)
-        function renderAllReviews(filterValue) {
+        function renderAllReviews(subjectFilter, gradeFilter) {
             const container = document.getElementById('subjects-grid');
             const statsEl = document.getElementById('review-stats');
-            
+
             let filteredReviews = allReviews;
-            if (filterValue) {
-                filteredReviews = allReviews.filter(r => r.subject === filterValue);
+
+            // 과목 필터링
+            if (subjectFilter) {
+                filteredReviews = filteredReviews.filter(r => r.subject === subjectFilter);
+            }
+
+            // 학년 필터링
+            if (gradeFilter) {
+                filteredReviews = filteredReviews.filter(r => r.grade == gradeFilter);
             }
 
             statsEl.innerHTML = `총 <strong>${filteredReviews.length}</strong>개의 리뷰`;
@@ -236,9 +259,9 @@
             // 렌더링
             let html = '';
             
-            if (filterValue) {
+            if (subjectFilter) {
                 // 필터 적용 시 단일 과목 표시
-                const subjectData = groupedBySubject[filterValue];
+                const subjectData = groupedBySubject[subjectFilter];
                 if (subjectData && subjectData.reviews.length > 0) {
                     html = renderSubjectCard(subjectData, true);
                 }
@@ -296,6 +319,16 @@
             `;
         }
 
+        // 학년 뱃지 색상 가져오기
+        function getGradeBadgeClass(grade) {
+            const gradeClasses = {
+                6: 'grade-6',
+                7: 'grade-7',
+                8: 'grade-8'
+            };
+            return gradeClasses[grade] || 'grade-unknown';
+        }
+
         // 리뷰 아이템 렌더링
         function renderReviewItem(review, isMyReview) {
             const actionsHtml = isMyReview ? `
@@ -304,14 +337,16 @@
                     <button onclick="deleteReview('${review.id}')" class="delete-btn">삭제</button>
                 </div>
             ` : '';
-            
+
             const myBadge = isMyReview ? '<span class="my-badge">내 리뷰</span>' : '';
+            const gradeBadge = review.grade ? `<span class="grade-badge ${getGradeBadgeClass(review.grade)}">${review.grade}학년</span>` : '';
 
             return `
                 <div class="review-item ${isMyReview ? 'my-review' : ''}">
                     <div class="review-top">
                         <div class="review-meta">
                             ${myBadge}
+                            ${gradeBadge}
                             <span class="review-date">${new Date(review.created_at).toLocaleDateString('ko-KR')}</span>
                         </div>
                         <div class="review-stars">
@@ -333,13 +368,20 @@
         }
 
         // 내 리뷰 렌더링
-        function renderMyReviews(filterValue) {
+        function renderMyReviews(subjectFilter, gradeFilter) {
             const container = document.getElementById('my-reviews-list');
             const statsEl = document.getElementById('review-stats');
-            
+
             let filteredReviews = myReviews;
-            if (filterValue) {
-                filteredReviews = myReviews.filter(r => r.subject === filterValue);
+
+            // 과목 필터링
+            if (subjectFilter) {
+                filteredReviews = filteredReviews.filter(r => r.subject === subjectFilter);
+            }
+
+            // 학년 필터링
+            if (gradeFilter) {
+                filteredReviews = filteredReviews.filter(r => r.grade == gradeFilter);
             }
 
             statsEl.innerHTML = `내 리뷰 <strong>${filteredReviews.length}</strong>개`;
@@ -357,12 +399,15 @@
             let html = '';
             filteredReviews.forEach(review => {
                 const subject = SUBJECTS.find(s => s.value === review.subject);
+                const gradeBadge = review.grade ? `<span class="grade-badge ${getGradeBadgeClass(review.grade)}">${review.grade}학년</span>` : '';
+
                 html += `
                     <div class="my-review-card">
                         <div class="my-review-header">
                             <div class="my-review-subject">
                                 <span class="subject-icon">${subject?.icon || '📚'}</span>
                                 <strong>${subject?.label || review.subject}</strong>
+                                ${gradeBadge}
                             </div>
                             <span class="review-date">${new Date(review.created_at).toLocaleDateString('ko-KR')}</span>
                         </div>

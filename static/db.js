@@ -131,7 +131,7 @@ window.auth = {
 window.comments = {
     // Create a new comment
     // 새 리뷰 작성 (user_id 자동 저장)
-    async create(subject, difficulty, lectureStyle, engagingLevel, reason) {
+    async create(subject, difficulty, lectureStyle, engagingLevel, reason, grade = null) {
         try {
             // Check if user is authenticated
             const { data: { user } } = await window.supabaseClient.auth.getUser();
@@ -141,9 +141,9 @@ window.comments = {
             }
 
             console.log('Creating comment with data:', {
-                subject, difficulty, lectureStyle, engagingLevel, reason, user_id: user.id
+                subject, difficulty, lectureStyle, engagingLevel, reason, grade, user_id: user.id
             });
-            
+
             const { data, error } = await window.supabaseClient
                 .from('comments')
                 .insert([
@@ -153,6 +153,7 @@ window.comments = {
                         lecture_style: lectureStyle,
                         engaging_level: engagingLevel,
                         reason: reason,
+                        grade: grade,
                         user_id: user.id
                     }
                 ])
@@ -202,21 +203,27 @@ window.comments = {
 
     // Get all comments (for public review list)
     // 전체 리뷰 가져오기 (공개용)
-    async getAllPublic(subjectFilter = null) {
+    async getAllPublic(subjectFilter = null, gradeFilter = null) {
         try {
             console.log('📥 Fetching all public comments...');
-            console.log('필터:', subjectFilter || '없음');
-            
+            console.log('과목 필터:', subjectFilter || '없음');
+            console.log('학년 필터:', gradeFilter || '없음');
+
             let query = window.supabaseClient
                 .from('comments')
                 .select('*')
                 .order('created_at', { ascending: false });
-            
+
             // 과목 필터 적용
             if (subjectFilter) {
                 query = query.eq('subject', subjectFilter);
             }
-            
+
+            // 학년 필터 적용
+            if (gradeFilter) {
+                query = query.eq('grade', gradeFilter);
+            }
+
             const { data, error } = await query;
             
             if (error) {
@@ -261,7 +268,7 @@ window.comments = {
     },
 
     // Update a comment
-    async update(id, subject, difficulty, lectureStyle, engagingLevel, reason) {
+    async update(id, subject, difficulty, lectureStyle, engagingLevel, reason, grade = null) {
         try {
             const { data, error } = await window.supabaseClient
                 .from('comments')
@@ -270,7 +277,8 @@ window.comments = {
                     difficulty: difficulty,
                     lecture_style: lectureStyle,
                     engaging_level: engagingLevel,
-                    reason: reason
+                    reason: reason,
+                    grade: grade
                 })
                 .eq('id', id)
                 .select();

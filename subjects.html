@@ -28,12 +28,22 @@
     <!-- 메인 평가 박스 -->
     <div class="main-box">
         <h2 class="form-title">📝 과목 평가하기</h2>
-        <p class="form-description">과목을 선택하고 솔직한 평가를 남겨주세요</p>
-        
+        <p class="form-description">학년과 과목을 선택하고 솔직한 평가를 남겨주세요</p>
+
+        <!-- 학년 선택 드롭다운 -->
+        <div class="custom-dropdown grade-dropdown">
+            <div class="dropdown-select grade-select">학년을 선택하세요</div>
+            <div class="dropdown-list grade-list" style="display: none;">
+                <div data-value="6">6학년</div>
+                <div data-value="7">7학년</div>
+                <div data-value="8">8학년</div>
+            </div>
+        </div>
+
         <!-- 과목 선택 드롭다운 -->
-        <div class="custom-dropdown">
-            <div class="dropdown-select">과목을 선택하세요</div>
-            <div class="dropdown-list">
+        <div class="custom-dropdown subject-dropdown" style="display: none;">
+            <div class="dropdown-select subject-select">과목을 선택하세요</div>
+            <div class="dropdown-list" style="display: none;">
                 <div data-value="Math">Math (수학)</div>
                 <div data-value="Science">Science (과학)</div>
                 <div data-value="English and Literature">English and Literature (영어)</div>
@@ -134,38 +144,82 @@
             }
         });
 
-        const dropdownSelect = document.querySelector('.dropdown-select');
-        const dropdownList = document.querySelector('.dropdown-list');
+        const gradeSelect = document.querySelector('.grade-select');
+        const gradeList = document.querySelector('.grade-list');
+        const subjectDropdown = document.querySelector('.subject-dropdown');
+        const subjectSelect = document.querySelector('.subject-select');
+        // 과목 드롭다운 내부의 dropdown-list만 선택 (학년 드롭다운과 구분)
+        const subjectList = document.querySelector('.subject-dropdown .dropdown-list');
         const ratingContent = document.querySelector('.rating-content');
         const submitButton = document.querySelector('.submit-button');
-        
-        // 드롭다운 토글
-        dropdownSelect.addEventListener('click', () => {
-            const isVisible = dropdownList.style.display === 'block';
-            dropdownList.style.display = isVisible ? 'none' : 'block';
-            dropdownSelect.classList.toggle('open', !isVisible);
+
+        let currentGrade = null;
+
+        // 드롭다운 초기 상태 설정
+        gradeList.style.display = 'none';
+        subjectList.style.display = 'none';
+
+        // 학년 드롭다운 토글
+        gradeSelect.addEventListener('click', () => {
+            const isVisible = gradeList.style.display === 'block';
+            gradeList.style.display = isVisible ? 'none' : 'block';
+            gradeSelect.classList.toggle('open', !isVisible);
+
+            // 다른 드롭다운 닫기
+            subjectList.style.display = 'none';
+            subjectSelect.classList.remove('open');
+        });
+
+        // 학년 선택
+        gradeList.addEventListener('click', (event) => {
+            if (event.target.dataset.value) {
+                const selectedGrade = parseInt(event.target.dataset.value);
+                gradeSelect.textContent = event.target.textContent;
+                currentGrade = selectedGrade;
+                gradeList.style.display = 'none';
+                gradeSelect.classList.remove('open');
+
+                // 과목 선택 드롭다운 표시
+                subjectDropdown.style.display = 'block';
+
+                // 과목 드롭다운 초기화
+                subjectSelect.textContent = '과목을 선택하세요';
+                currentSubject = null;
+                ratingContent.style.display = 'none';
+            }
+        });
+
+        // 과목 드롭다운 토글
+        subjectSelect.addEventListener('click', () => {
+            const isVisible = subjectList.style.display === 'block';
+            subjectList.style.display = isVisible ? 'none' : 'block';
+            subjectSelect.classList.toggle('open', !isVisible);
+
+            // 다른 드롭다운 닫기
+            gradeList.style.display = 'none';
+            gradeSelect.classList.remove('open');
         });
 
         // 과목 선택
-        dropdownList.addEventListener('click', (event) => {
+        subjectList.addEventListener('click', (event) => {
             if (event.target.dataset.value) {
                 const selectedSubject = event.target.dataset.value;
-                dropdownSelect.textContent = event.target.textContent;
+                subjectSelect.textContent = event.target.textContent;
                 currentSubject = selectedSubject;
-                dropdownList.style.display = 'none';
-                dropdownSelect.classList.remove('open');
+                subjectList.style.display = 'none';
+                subjectSelect.classList.remove('open');
                 ratingContent.style.display = 'flex';
-                
+
                 // 폼 초기화
                 document.querySelector('.form-bottom').style.display = 'block';
                 document.querySelector('.submitted-message').style.display = 'none';
                 document.querySelector('#submit-loader').style.display = 'none';
                 document.querySelector('.reason-box textarea').value = '';
-                
+
                 document.querySelectorAll('.star').forEach(star => {
                     star.classList.remove('active');
                 });
-                
+
                 editingCommentId = null;
                 submitButton.textContent = '제출하기';
             }
@@ -173,9 +227,13 @@
 
         // 드롭다운 외부 클릭 시 닫기
         document.addEventListener('click', (event) => {
-            if (!dropdownSelect.contains(event.target)) {
-                dropdownList.style.display = 'none';
-                dropdownSelect.classList.remove('open');
+            if (!gradeSelect.contains(event.target) && !gradeList.contains(event.target)) {
+                gradeList.style.display = 'none';
+                gradeSelect.classList.remove('open');
+            }
+            if (!subjectSelect.contains(event.target) && !subjectList.contains(event.target)) {
+                subjectList.style.display = 'none';
+                subjectSelect.classList.remove('open');
             }
         });
 
@@ -202,6 +260,11 @@
                     return;
                 }
                 currentUser = user;
+            }
+
+            if (!currentGrade) {
+                alert('학년을 먼저 선택해주세요');
+                return;
             }
 
             if (!currentSubject) {
@@ -239,9 +302,9 @@
             try {
                 let result;
                 if (editingCommentId) {
-                    result = await window.comments.update(editingCommentId, currentSubject, difficulty, lectureStyle, engagingLevel, textarea.value.trim());
+                    result = await window.comments.update(editingCommentId, currentSubject, difficulty, lectureStyle, engagingLevel, textarea.value.trim(), currentGrade);
                 } else {
-                    result = await window.comments.create(currentSubject, difficulty, lectureStyle, engagingLevel, textarea.value.trim());
+                    result = await window.comments.create(currentSubject, difficulty, lectureStyle, engagingLevel, textarea.value.trim(), currentGrade);
                 }
                 
                 loader.style.display = 'none';

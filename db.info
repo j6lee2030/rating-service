@@ -6,6 +6,7 @@ CREATE TABLE comments (
     lecture_style INTEGER NOT NULL CHECK (lecture_style >= 1 AND lecture_style <= 5),
     engaging_level INTEGER NOT NULL CHECK (engaging_level >= 1 AND engaging_level <= 5),
     reason TEXT NOT NULL,
+    grade INTEGER CHECK (grade IN (6, 7, 8)),
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
