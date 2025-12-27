@@ -1,43 +1,43 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>로그인 - CI Rating Service</title>
+    <title>Login - CI Rating Service</title>
     <link rel="stylesheet" href="static/styles.css">
 </head>
 <body class="with-hero-bg">
-    <!-- 헤더 네비게이션 -->
+    <!-- Header Navigation -->
     <header class="header">
         <a href="index.html" class="logo-wrapper">
             <img src="static/logo.jpg" alt="CI Logo" class="logo">
             <span class="logo-text">CI Rating</span>
         </a>
         <nav class="header-menu">
-            <a href="subjects.html">과목 평가</a>
-            <a href="reviews.html">리뷰 보기</a>
+            <a href="subjects.html">Rate Subjects</a>
+            <a href="reviews.html">View Reviews</a>
         </nav>
     </header>
 
-    <!-- 메인 콘텐츠 -->
+    <!-- Main Content -->
     <main class="main-content">
         <div class="login-container">
-            <h1 class="login-title">로그인</h1>
+            <h1 class="login-title">Login</h1>
             <form class="login-form" id="loginForm">
-                <label for="email">이메일</label>
-                <input type="email" id="email" name="email" placeholder="이메일 주소를 입력하세요" required>
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" placeholder="Enter your email address" required>
                 
-                <label for="password">비밀번호</label>
-                <input type="password" id="password" name="password" placeholder="비밀번호를 입력하세요" required>
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" placeholder="Enter your password" required>
                 
-                <button type="submit" class="next-btn">로그인</button>
+                <button type="submit" class="next-btn">Login</button>
             </form>
             <div id="authMessage" class="auth-message"></div>
             
-            <!-- 회원가입 링크 -->
+            <!-- Sign Up Link -->
             <div class="auth-link">
-                <p>아직 계정이 없으신가요?</p>
-                <a href="signup.html">회원가입하기</a>
+                <p>Don't have an account yet?</p>
+                <a href="signup.html">Sign Up</a>
             </div>
         </div>
     </main>
@@ -52,7 +52,7 @@
             const emailInput = document.getElementById('email');
             const passwordInput = document.getElementById('password');
 
-            // 메시지 표시 헬퍼 함수
+            // Helper function to show messages
             function showMessage(message, type) {
                 authMessage.textContent = message;
                 authMessage.className = `auth-message ${type}`;
@@ -62,7 +62,7 @@
                 }, 5000);
             }
 
-            // 로그인 폼 제출 처리
+            // Handle login form submission
             loginForm.addEventListener('submit', async function(e) {
                 e.preventDefault();
                 
@@ -70,39 +70,39 @@
                 const password = passwordInput.value;
 
                 if (!email || !password) {
-                    showMessage('모든 필드를 입력해주세요', 'error');
+                    showMessage('Please fill in all fields', 'error');
                     return;
                 }
 
-                // 로딩 상태 표시
+                // Show loading state
                 const submitBtn = document.querySelector('.next-btn');
                 const originalText = submitBtn.textContent;
-                submitBtn.textContent = '로그인 중...';
+                submitBtn.textContent = 'Logging in...';
                 submitBtn.disabled = true;
 
                 try {
                     const result = await window.auth.signIn(email, password);
                     
                     if (result.success) {
-                        showMessage('로그인 성공! 이동 중...', 'success');
+                        showMessage('Login successful! Redirecting...', 'success');
                         
-                        // 인증 상태가 제대로 설정될 때까지 대기
+                        // Wait for authentication state to be properly set
                         await new Promise(resolve => setTimeout(resolve, 1500));
                         
-                        // 실제로 로그인되었는지 확인
+                        // Verify that login was successful
                         const currentUser = await window.auth.getCurrentUser();
                         if (currentUser) {
                             window.auth.updateLastActivity();
                             window.location.href = 'subjects.html';
                         } else {
-                            showMessage('인증에 실패했습니다. 다시 시도해주세요.', 'error');
+                            showMessage('Authentication failed. Please try again.', 'error');
                         }
                     } else {
-                        showMessage(result.error || '로그인 실패. 다시 시도해주세요.', 'error');
+                        showMessage(result.error || 'Login failed. Please try again.', 'error');
                     }
                 } catch (error) {
-                    console.error('로그인 에러:', error);
-                    showMessage('네트워크 오류. 다시 시도해주세요.', 'error');
+                    console.error('Login error:', error);
+                    showMessage('Network error. Please try again.', 'error');
                 } finally {
                     submitBtn.textContent = originalText;
                     submitBtn.disabled = false;

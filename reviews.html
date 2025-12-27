@@ -1,78 +1,78 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>리뷰 - CI Rating Service</title>
+    <title>Reviews - CI Rating Service</title>
     <link rel="stylesheet" href="static/styles.css">
 </head>
 <body class="with-subjects-bg">
-    <!-- 헤더 네비게이션 -->
+    <!-- Header Navigation -->
     <header class="header">
         <a href="index.html" class="logo-wrapper">
             <img src="static/logo.jpg" alt="CI Logo" class="logo">
             <span class="logo-text">CI Rating</span>
         </a>
         <nav class="header-menu">
-            <a href="index.html">홈</a>
-            <a href="subjects.html">평가하기</a>
-            <button id="logout-btn" onclick="window.logout()">로그아웃</button>
+            <a href="index.html">Home</a>
+            <a href="subjects.html">Rate</a>
+            <button id="logout-btn" onclick="window.logout()">Logout</button>
         </nav>
     </header>
 
-    <!-- 페이지 로더 -->
+    <!-- Page Loader -->
     <div class="page-loader-overlay" id="page-loader">
         <div class="loader"></div>
     </div>
 
-    <!-- 리뷰 페이지 컨테이너 -->
+    <!-- Reviews Page Container -->
     <div class="reviews-page">
-        <!-- 페이지 헤더 -->
+        <!-- Page Header -->
         <div class="page-header">
-            <h1>📚 과목별 리뷰</h1>
-            <p>모든 과목의 리뷰를 한눈에 확인하세요</p>
+            <h1>📚 Subject Reviews</h1>
+            <p>View all subject reviews at a glance</p>
         </div>
 
-        <!-- 탭 네비게이션 -->
+        <!-- Tab Navigation -->
         <div class="review-tabs">
-            <button class="review-tab active" data-tab="all">전체 리뷰</button>
-            <button class="review-tab" data-tab="my">내 리뷰</button>
+            <button class="review-tab active" data-tab="all">All Reviews</button>
+            <button class="review-tab" data-tab="my">My Reviews</button>
         </div>
 
-        <!-- 필터 영역 -->
+        <!-- Filter Area -->
         <div class="filter-bar">
             <div class="filter-group">
-                <label>학년 필터:</label>
+                <label>Grade Filter:</label>
                 <select id="grade-filter">
-                    <option value="">전체 학년</option>
-                    <option value="6">6학년</option>
-                    <option value="7">7학년</option>
-                    <option value="8">8학년</option>
+                    <option value="">All Grades</option>
+                    <option value="6">Grade 6</option>
+                    <option value="7">Grade 7</option>
+                    <option value="8">Grade 8</option>
                 </select>
             </div>
             <div class="filter-group">
-                <label>과목 필터:</label>
+                <label>Subject Filter:</label>
                 <select id="subject-filter">
-                    <option value="">전체 과목</option>
+                    <option value="">All Subjects</option>
                 </select>
             </div>
             <div class="review-stats" id="review-stats">
-                총 <strong>0</strong>개의 리뷰
+                Total <strong>0</strong> reviews
             </div>
         </div>
 
-        <!-- 전체 리뷰 탭 -->
+        <!-- All Reviews Tab -->
         <div class="tab-panel active" id="panel-all">
-            <!-- 과목별 그룹 -->
+            <!-- Subject Groups -->
             <div class="subjects-grid" id="subjects-grid">
-                <!-- 동적으로 생성됨 -->
+                <!-- Dynamically generated -->
             </div>
         </div>
 
-        <!-- 내 리뷰 탭 -->
+        <!-- My Reviews Tab -->
         <div class="tab-panel" id="panel-my">
             <div class="my-reviews-list" id="my-reviews-list">
-                <!-- 동적으로 생성됨 -->
+                <!-- Dynamically generated -->
             </div>
         </div>
     </div>
@@ -81,27 +81,27 @@
     <script src="static/db.js"></script>
     <script src="static/main.js"></script>
     <script>
-        // 과목 목록
+        // Subject list
         const SUBJECTS = [
-            { value: 'Math', label: 'Math (수학)', icon: '🔢' },
-            { value: 'Science', label: 'Science (과학)', icon: '🔬' },
-            { value: 'English and Literature', label: 'English and Literature (영어)', icon: '📖' },
-            { value: 'Individuals and Societies', label: 'Individuals and Societies (사회)', icon: '🌍' },
-            { value: 'Design', label: 'Design (디자인)', icon: '🎨' },
-            { value: 'Chinese', label: 'Chinese (중국어)', icon: '🇨🇳' },
-            { value: 'Korean', label: 'Korean (국어)', icon: '🇰🇷' },
-            { value: 'Spanish', label: 'Spanish (스페인어)', icon: '🇪🇸' },
-            { value: 'Strings', label: 'Strings (현악)', icon: '🎻' },
-            { value: 'Piano & Guitar', label: 'Piano & Guitar (피아노 & 기타)', icon: '🎹' },
-            { value: 'Vocal music', label: 'Vocal music (성악)', icon: '🎤' },
-            { value: 'Media Arts', label: 'Media Arts (미디어 아트)', icon: '🎬' }
+            { value: 'Math', label: 'Math', icon: '🔢' },
+            { value: 'Science', label: 'Science', icon: '🔬' },
+            { value: 'English and Literature', label: 'English and Literature', icon: '📖' },
+            { value: 'Individuals and Societies', label: 'Individuals and Societies', icon: '🌍' },
+            { value: 'Design', label: 'Design', icon: '🎨' },
+            { value: 'Chinese', label: 'Chinese', icon: '🇨🇳' },
+            { value: 'Korean', label: 'Korean', icon: '🇰🇷' },
+            { value: 'Spanish', label: 'Spanish', icon: '🇪🇸' },
+            { value: 'Strings', label: 'Strings', icon: '🎻' },
+            { value: 'Piano & Guitar', label: 'Piano & Guitar', icon: '🎹' },
+            { value: 'Vocal music', label: 'Vocal music', icon: '🎤' },
+            { value: 'Media Arts', label: 'Media Arts', icon: '🎬' }
         ];
 
         let currentUserId = null;
         let allReviews = [];
         let myReviews = [];
 
-        // 로그인 확인 및 초기화
+        // Check login and initialize
         document.addEventListener('DOMContentLoaded', async function() {
             const pageLoader = document.getElementById('page-loader');
             pageLoader.style.display = 'flex';
@@ -111,39 +111,39 @@
             if (window.auth) {
                 const isValid = await window.auth.checkSessionValidity();
                 if (!isValid) {
-                    alert('로그인이 필요합니다');
+                    alert('Please log in');
                     window.location.href = 'login.html';
                     return;
                 }
                 
                 currentUser = await window.auth.getCurrentUser();
                 if (!currentUser) {
-                    alert('로그인이 필요합니다');
+                    alert('Please log in');
                     window.location.href = 'login.html';
                     return;
                 }
                 
                 currentUserId = currentUser.id;
-                console.log('✅ 로그인 확인됨:', currentUser.email);
+                console.log('✅ Login confirmed:', currentUser.email);
             } else {
-                alert('인증 시스템을 사용할 수 없습니다');
+                alert('Authentication system is unavailable');
                 window.location.href = 'login.html';
                 return;
             }
 
-            // 필터 옵션 초기화
+            // Initialize filter options
             initFilters();
             
-            // 탭 이벤트 설정
+            // Set up tab events
             setupTabs();
             
-            // 데이터 로드
+            // Load data
             await loadAllData();
             
             pageLoader.style.display = 'none';
         });
 
-        // 필터 초기화
+        // Initialize filters
         function initFilters() {
             const subjectFilterSelect = document.getElementById('subject-filter');
             const gradeFilterSelect = document.getElementById('grade-filter');
@@ -164,7 +164,7 @@
             });
         }
 
-        // 탭 설정
+        // Set up tabs
         function setupTabs() {
             const tabs = document.querySelectorAll('.review-tab');
             tabs.forEach(tab => {
@@ -180,34 +180,34 @@
             });
         }
 
-        // 전체 데이터 로드
+        // Load all data
         async function loadAllData() {
             try {
-                console.log('📥 데이터 로드 시작...');
-                console.log('현재 사용자 ID:', currentUserId);
+                console.log('📥 Starting data load...');
+                console.log('Current user ID:', currentUserId);
 
-                // 전체 리뷰 로드 (필터링 없이)
+                // Load all reviews (without filtering)
                 const allResult = await window.comments.getAllPublic();
-                console.log('전체 리뷰 결과:', allResult);
+                console.log('All reviews result:', allResult);
                 
                 if (allResult.success) {
                     allReviews = allResult.data || [];
-                    console.log(`✅ 전체 리뷰 ${allReviews.length}개 로드됨`);
+                    console.log(`✅ Loaded ${allReviews.length} reviews`);
                 } else {
-                    console.error('❌ 전체 리뷰 로드 실패:', allResult.error);
+                    console.error('❌ Failed to load reviews:', allResult.error);
                 }
 
-                // 내 리뷰는 전체 리뷰에서 필터링 (user_id가 없는 기존 데이터 호환)
+                // Filter my reviews from all reviews (compatible with existing data without user_id)
                 myReviews = allReviews.filter(r => r.user_id === currentUserId);
-                console.log(`✅ 내 리뷰 ${myReviews.length}개 필터됨`);
+                console.log(`✅ Filtered ${myReviews.length} of my reviews`);
 
                 renderCurrentTab();
             } catch (error) {
-                console.error('❌ 데이터 로드 오류:', error);
+                console.error('❌ Data load error:', error);
             }
         }
 
-        // 현재 탭 렌더링
+        // Render current tab
         function renderCurrentTab() {
             const activeTab = document.querySelector('.review-tab.active').dataset.tab;
             const subjectFilterValue = document.getElementById('subject-filter').value;
@@ -220,31 +220,31 @@
             }
         }
 
-        // 전체 리뷰 렌더링 (과목별 그룹)
+        // Render all reviews (grouped by subject)
         function renderAllReviews(subjectFilter, gradeFilter) {
             const container = document.getElementById('subjects-grid');
             const statsEl = document.getElementById('review-stats');
 
             let filteredReviews = allReviews;
 
-            // 과목 필터링
+            // Subject filtering
             if (subjectFilter) {
                 filteredReviews = filteredReviews.filter(r => r.subject === subjectFilter);
             }
 
-            // 학년 필터링
+            // Grade filtering
             if (gradeFilter) {
                 filteredReviews = filteredReviews.filter(r => r.grade == gradeFilter);
             }
 
-            statsEl.innerHTML = `총 <strong>${filteredReviews.length}</strong>개의 리뷰`;
+            statsEl.innerHTML = `Total <strong>${filteredReviews.length}</strong> reviews`;
 
             if (filteredReviews.length === 0) {
-                container.innerHTML = '<div class="no-reviews">아직 작성된 리뷰가 없습니다.</div>';
+                container.innerHTML = '<div class="no-reviews">No reviews have been written yet.</div>';
                 return;
             }
 
-            // 과목별로 그룹화
+            // Group by subject
             const groupedBySubject = {};
             SUBJECTS.forEach(s => {
                 groupedBySubject[s.value] = { ...s, reviews: [] };
@@ -256,17 +256,17 @@
                 }
             });
 
-            // 렌더링
+            // Render
             let html = '';
             
             if (subjectFilter) {
-                // 필터 적용 시 단일 과목 표시
+                // Show single subject when filter is applied
                 const subjectData = groupedBySubject[subjectFilter];
                 if (subjectData && subjectData.reviews.length > 0) {
                     html = renderSubjectCard(subjectData, true);
                 }
             } else {
-                // 전체 과목 그리드
+                // All subjects grid
                 Object.values(groupedBySubject).forEach(subjectData => {
                     if (subjectData.reviews.length > 0) {
                         html += renderSubjectCard(subjectData, false);
@@ -274,10 +274,10 @@
                 });
             }
 
-            container.innerHTML = html || '<div class="no-reviews">아직 작성된 리뷰가 없습니다.</div>';
+            container.innerHTML = html || '<div class="no-reviews">No reviews have been written yet.</div>';
         }
 
-        // 과목 카드 렌더링
+        // Render subject card
         function renderSubjectCard(subjectData, expanded) {
             const reviews = subjectData.reviews;
             const avgDifficulty = (reviews.reduce((a, r) => a + r.difficulty, 0) / reviews.length).toFixed(1);
@@ -294,7 +294,7 @@
 
             const moreCount = reviews.length - 3;
             const showMoreBtn = !expanded && moreCount > 0 
-                ? `<button class="show-more-btn" onclick="expandSubject('${subjectData.value}')">+${moreCount}개 더보기</button>` 
+                ? `<button class="show-more-btn" onclick="expandSubject('${subjectData.value}')">+${moreCount} more</button>` 
                 : '';
 
             return `
@@ -303,12 +303,12 @@
                         <div class="subject-title">
                             <span class="subject-icon">${subjectData.icon}</span>
                             <h3>${subjectData.label}</h3>
-                            <span class="review-count">${reviews.length}개</span>
+                            <span class="review-count">${reviews.length}</span>
                         </div>
                         <div class="subject-averages">
-                            <span class="avg-chip" title="평균 난이도">난이도 ${avgDifficulty}</span>
-                            <span class="avg-chip" title="평균 강의 스타일">강의 ${avgLecture}</span>
-                            <span class="avg-chip" title="평균 흥미도">흥미 ${avgEngaging}</span>
+                            <span class="avg-chip" title="Average Difficulty">Difficulty ${avgDifficulty}</span>
+                            <span class="avg-chip" title="Average Lecture Style">Lecture ${avgLecture}</span>
+                            <span class="avg-chip" title="Average Engagement">Engagement ${avgEngaging}</span>
                         </div>
                     </div>
                     <div class="subject-reviews">
@@ -319,7 +319,7 @@
             `;
         }
 
-        // 학년 뱃지 색상 가져오기
+        // Get grade badge color class
         function getGradeBadgeClass(grade) {
             const gradeClasses = {
                 6: 'grade-6',
@@ -329,17 +329,17 @@
             return gradeClasses[grade] || 'grade-unknown';
         }
 
-        // 리뷰 아이템 렌더링
+        // Render review item
         function renderReviewItem(review, isMyReview) {
             const actionsHtml = isMyReview ? `
                 <div class="review-actions">
-                    <button onclick="editReview('${review.id}')" class="edit-btn">수정</button>
-                    <button onclick="deleteReview('${review.id}')" class="delete-btn">삭제</button>
+                    <button onclick="editReview('${review.id}')" class="edit-btn">Edit</button>
+                    <button onclick="deleteReview('${review.id}')" class="delete-btn">Delete</button>
                 </div>
             ` : '';
 
-            const myBadge = isMyReview ? '<span class="my-badge">내 리뷰</span>' : '';
-            const gradeBadge = review.grade ? `<span class="grade-badge ${getGradeBadgeClass(review.grade)}">${review.grade}학년</span>` : '';
+            const myBadge = isMyReview ? '<span class="my-badge">My Review</span>' : '';
+            const gradeBadge = review.grade ? `<span class="grade-badge ${getGradeBadgeClass(review.grade)}">Grade ${review.grade}</span>` : '';
 
             return `
                 <div class="review-item ${isMyReview ? 'my-review' : ''}">
@@ -347,12 +347,12 @@
                         <div class="review-meta">
                             ${myBadge}
                             ${gradeBadge}
-                            <span class="review-date">${new Date(review.created_at).toLocaleDateString('ko-KR')}</span>
+                            <span class="review-date">${new Date(review.created_at).toLocaleDateString('en-US')}</span>
                         </div>
                         <div class="review-stars">
-                            <span>난이도 ${'★'.repeat(review.difficulty)}${'☆'.repeat(5-review.difficulty)}</span>
-                            <span>강의 ${'★'.repeat(review.lecture_style)}${'☆'.repeat(5-review.lecture_style)}</span>
-                            <span>흥미 ${'★'.repeat(review.engaging_level)}${'☆'.repeat(5-review.engaging_level)}</span>
+                            <span>Difficulty ${'★'.repeat(review.difficulty)}${'☆'.repeat(5-review.difficulty)}</span>
+                            <span>Lecture ${'★'.repeat(review.lecture_style)}${'☆'.repeat(5-review.lecture_style)}</span>
+                            <span>Engagement ${'★'.repeat(review.engaging_level)}${'☆'.repeat(5-review.engaging_level)}</span>
                         </div>
                     </div>
                     <div class="review-text">${review.reason}</div>
@@ -361,36 +361,36 @@
             `;
         }
 
-        // 과목 확장
+        // Expand subject
         window.expandSubject = function(subjectValue) {
             document.getElementById('subject-filter').value = subjectValue;
             renderCurrentTab();
         }
 
-        // 내 리뷰 렌더링
+        // Render my reviews
         function renderMyReviews(subjectFilter, gradeFilter) {
             const container = document.getElementById('my-reviews-list');
             const statsEl = document.getElementById('review-stats');
 
             let filteredReviews = myReviews;
 
-            // 과목 필터링
+            // Subject filtering
             if (subjectFilter) {
                 filteredReviews = filteredReviews.filter(r => r.subject === subjectFilter);
             }
 
-            // 학년 필터링
+            // Grade filtering
             if (gradeFilter) {
                 filteredReviews = filteredReviews.filter(r => r.grade == gradeFilter);
             }
 
-            statsEl.innerHTML = `내 리뷰 <strong>${filteredReviews.length}</strong>개`;
+            statsEl.innerHTML = `My Reviews <strong>${filteredReviews.length}</strong>`;
 
             if (filteredReviews.length === 0) {
                 container.innerHTML = `
                     <div class="no-reviews">
-                        <p>아직 작성한 리뷰가 없습니다.</p>
-                        <a href="subjects.html" class="write-review-btn">리뷰 작성하기</a>
+                        <p>You haven't written any reviews yet.</p>
+                        <a href="subjects.html" class="write-review-btn">Write a Review</a>
                     </div>
                 `;
                 return;
@@ -399,7 +399,7 @@
             let html = '';
             filteredReviews.forEach(review => {
                 const subject = SUBJECTS.find(s => s.value === review.subject);
-                const gradeBadge = review.grade ? `<span class="grade-badge ${getGradeBadgeClass(review.grade)}">${review.grade}학년</span>` : '';
+                const gradeBadge = review.grade ? `<span class="grade-badge ${getGradeBadgeClass(review.grade)}">Grade ${review.grade}</span>` : '';
 
                 html += `
                     <div class="my-review-card">
@@ -409,17 +409,17 @@
                                 <strong>${subject?.label || review.subject}</strong>
                                 ${gradeBadge}
                             </div>
-                            <span class="review-date">${new Date(review.created_at).toLocaleDateString('ko-KR')}</span>
+                            <span class="review-date">${new Date(review.created_at).toLocaleDateString('en-US')}</span>
                         </div>
                         <div class="my-review-ratings">
-                            <span>난이도 ${'★'.repeat(review.difficulty)}${'☆'.repeat(5-review.difficulty)}</span>
-                            <span>강의 ${'★'.repeat(review.lecture_style)}${'☆'.repeat(5-review.lecture_style)}</span>
-                            <span>흥미 ${'★'.repeat(review.engaging_level)}${'☆'.repeat(5-review.engaging_level)}</span>
+                            <span>Difficulty ${'★'.repeat(review.difficulty)}${'☆'.repeat(5-review.difficulty)}</span>
+                            <span>Lecture ${'★'.repeat(review.lecture_style)}${'☆'.repeat(5-review.lecture_style)}</span>
+                            <span>Engagement ${'★'.repeat(review.engaging_level)}${'☆'.repeat(5-review.engaging_level)}</span>
                         </div>
                         <div class="my-review-text">${review.reason}</div>
                         <div class="my-review-actions">
-                            <button onclick="editReview('${review.id}')" class="edit-btn">수정</button>
-                            <button onclick="deleteReview('${review.id}')" class="delete-btn">삭제</button>
+                            <button onclick="editReview('${review.id}')" class="edit-btn">Edit</button>
+                            <button onclick="deleteReview('${review.id}')" class="delete-btn">Delete</button>
                         </div>
                     </div>
                 `;
@@ -428,27 +428,27 @@
             container.innerHTML = html;
         }
 
-        // 리뷰 수정
+        // Edit review
         window.editReview = async function(reviewId) {
-            // subjects.html로 이동하면서 수정 모드 설정
+            // Navigate to subjects.html with edit mode
             sessionStorage.setItem('editReviewId', reviewId);
             window.location.href = 'subjects.html';
         }
 
-        // 리뷰 삭제
+        // Delete review
         window.deleteReview = async function(reviewId) {
-            if (!confirm('이 리뷰를 삭제하시겠습니까?')) return;
+            if (!confirm('Are you sure you want to delete this review?')) return;
             
             try {
                 const result = await window.comments.delete(reviewId);
                 if (result.success) {
                     await loadAllData();
                 } else {
-                    alert(result.error || '삭제 실패');
+                    alert(result.error || 'Delete failed');
                 }
             } catch (error) {
-                console.error('삭제 오류:', error);
-                alert('네트워크 오류');
+                console.error('Delete error:', error);
+                alert('Network error');
             }
         }
     </script>

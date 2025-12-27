@@ -1,69 +1,69 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>과목 평가 - CI Rating Service</title>
+    <title>Rate Subjects - CI Rating Service</title>
     <link rel="stylesheet" href="static/styles.css">
 </head>
 <body class="with-subjects-bg">
-    <!-- 헤더 네비게이션 -->
+    <!-- Header Navigation -->
     <header class="header">
         <a href="index.html" class="logo-wrapper">
             <img src="static/logo.jpg" alt="CI Logo" class="logo">
             <span class="logo-text">CI Rating</span>
         </a>
         <nav class="header-menu">
-            <a href="index.html">홈</a>
-            <a href="reviews.html">리뷰 보기</a>
-            <button id="logout-btn" onclick="window.logout()">로그아웃</button>
+            <a href="index.html">Home</a>
+            <a href="reviews.html">View Reviews</a>
+            <button id="logout-btn" onclick="window.logout()">Logout</button>
         </nav>
     </header>
 
-    <!-- 페이지 로더 -->
+    <!-- Page Loader -->
     <div class="page-loader-overlay">
         <div class="loader"></div>
     </div>
 
-    <!-- 메인 평가 박스 -->
+    <!-- Main Rating Box -->
     <div class="main-box">
-        <h2 class="form-title">📝 과목 평가하기</h2>
-        <p class="form-description">학년과 과목을 선택하고 솔직한 평가를 남겨주세요</p>
+        <h2 class="form-title">📝 Rate a Subject</h2>
+        <p class="form-description">Select your grade and subject, then share your honest review</p>
 
-        <!-- 학년 선택 드롭다운 -->
+        <!-- Grade Selection Dropdown -->
         <div class="custom-dropdown grade-dropdown">
-            <div class="dropdown-select grade-select">학년을 선택하세요</div>
+            <div class="dropdown-select grade-select">Select Grade</div>
             <div class="dropdown-list grade-list" style="display: none;">
-                <div data-value="6">6학년</div>
-                <div data-value="7">7학년</div>
-                <div data-value="8">8학년</div>
+                <div data-value="6">Grade 6</div>
+                <div data-value="7">Grade 7</div>
+                <div data-value="8">Grade 8</div>
             </div>
         </div>
 
-        <!-- 과목 선택 드롭다운 -->
+        <!-- Subject Selection Dropdown -->
         <div class="custom-dropdown subject-dropdown" style="display: none;">
-            <div class="dropdown-select subject-select">과목을 선택하세요</div>
+            <div class="dropdown-select subject-select">Select Subject</div>
             <div class="dropdown-list" style="display: none;">
-                <div data-value="Math">Math (수학)</div>
-                <div data-value="Science">Science (과학)</div>
-                <div data-value="English and Literature">English and Literature (영어)</div>
-                <div data-value="Individuals and Societies">Individuals and Societies (사회)</div>
-                <div data-value="Design">Design (디자인)</div>
-                <div data-value="Chinese">Chinese (중국어)</div>
-                <div data-value="Korean">Korean (국어)</div>
-                <div data-value="Spanish">Spanish (스페인어)</div>
-                <div data-value="Strings">Strings (현악)</div>
-                <div data-value="Piano & Guitar">Piano & Guitar (피아노 & 기타)</div>
-                <div data-value="Vocal music">Vocal music (성악)</div>
-                <div data-value="Media Arts">Media Arts (미디어 아트)</div>
+                <div data-value="Math">Math</div>
+                <div data-value="Science">Science</div>
+                <div data-value="English and Literature">English and Literature</div>
+                <div data-value="Individuals and Societies">Individuals and Societies</div>
+                <div data-value="Design">Design</div>
+                <div data-value="Chinese">Chinese</div>
+                <div data-value="Korean">Korean</div>
+                <div data-value="Spanish">Spanish</div>
+                <div data-value="Strings">Strings</div>
+                <div data-value="Piano & Guitar">Piano & Guitar</div>
+                <div data-value="Vocal music">Vocal music</div>
+                <div data-value="Media Arts">Media Arts</div>
             </div>
         </div>
 
-        <!-- 평점 입력 영역 -->
+        <!-- Rating Input Area -->
         <div class="rating-content">
             <div class="rating-system">
                 <div class="rating-row">
-                    <span class="rating-label">난이도</span>
+                    <span class="rating-label">Difficulty</span>
                     <div class="stars" data-rating-type="difficulty">
                         <span class="star">★</span>
                         <span class="star">★</span>
@@ -73,7 +73,7 @@
                     </div>
                 </div>
                 <div class="rating-row">
-                    <span class="rating-label">강의 스타일</span>
+                    <span class="rating-label">Lecture Style</span>
                     <div class="stars" data-rating-type="lecture_style">
                         <span class="star">★</span>
                         <span class="star">★</span>
@@ -83,7 +83,7 @@
                     </div>
                 </div>
                 <div class="rating-row">
-                    <span class="rating-label">흥미도</span>
+                    <span class="rating-label">Engagement</span>
                     <div class="stars" data-rating-type="engaging_level">
                         <span class="star">★</span>
                         <span class="star">★</span>
@@ -94,21 +94,21 @@
                 </div>
             </div>
             
-            <!-- 리뷰 작성 -->
+            <!-- Review Writing -->
             <div class="form-bottom">
                 <div class="reason-box">
-                    <p>상세 리뷰</p>
-                    <textarea placeholder="이 과목에 대한 솔직한 의견을 작성해주세요..."></textarea>
-                    <div class="validation-message">리뷰 내용을 입력해주세요.</div>
+                    <p>Detailed Review</p>
+                    <textarea placeholder="Share your honest opinion about this subject..."></textarea>
+                    <div class="validation-message">Please enter your review content.</div>
                 </div>
-                <button class="submit-button">제출하기</button>
+                <button class="submit-button">Submit</button>
             </div>
             
-            <!-- 로딩 & 완료 메시지 -->
+            <!-- Loading & Success Message -->
             <div class="loader" id="submit-loader"></div>
             <div class="submitted-message">
-                리뷰가 제출되었습니다! 🎉
-                <a href="reviews.html" class="view-reviews-link">리뷰 보러가기 →</a>
+                Review submitted successfully! 🎉
+                <a href="reviews.html" class="view-reviews-link">View Reviews →</a>
             </div>
         </div>
     </div>
@@ -117,28 +117,28 @@
     <script src="static/db.js"></script>
     <script src="static/main.js"></script>
     <script>
-        // 로그인 확인
+        // Check login status
         document.addEventListener('DOMContentLoaded', async function() {
             await new Promise(resolve => setTimeout(resolve, 500));
             
             if (window.auth) {
                 const isValid = await window.auth.checkSessionValidity();
                 if (!isValid) {
-                    alert('로그인이 필요합니다');
+                    alert('Please log in');
                     window.location.href = 'login.html';
                     return;
                 }
                 
                 currentUser = await window.auth.getCurrentUser();
                 if (!currentUser) {
-                    alert('로그인이 필요합니다');
+                    alert('Please log in');
                     window.location.href = 'login.html';
                     return;
                 }
                 
-                console.log('✅ 로그인 확인됨:', currentUser.email);
+                console.log('✅ Login confirmed:', currentUser.email);
             } else {
-                alert('인증 시스템을 사용할 수 없습니다');
+                alert('Authentication system is unavailable');
                 window.location.href = 'login.html';
                 return;
             }
@@ -155,22 +155,22 @@
 
         let currentGrade = null;
 
-        // 드롭다운 초기 상태 설정
+        // Set initial dropdown state
         gradeList.style.display = 'none';
         subjectList.style.display = 'none';
 
-        // 학년 드롭다운 토글
+        // Grade dropdown toggle
         gradeSelect.addEventListener('click', () => {
             const isVisible = gradeList.style.display === 'block';
             gradeList.style.display = isVisible ? 'none' : 'block';
             gradeSelect.classList.toggle('open', !isVisible);
 
-            // 다른 드롭다운 닫기
+            // Close other dropdown
             subjectList.style.display = 'none';
             subjectSelect.classList.remove('open');
         });
 
-        // 학년 선택
+        // Grade selection
         gradeList.addEventListener('click', (event) => {
             if (event.target.dataset.value) {
                 const selectedGrade = parseInt(event.target.dataset.value);
@@ -179,28 +179,28 @@
                 gradeList.style.display = 'none';
                 gradeSelect.classList.remove('open');
 
-                // 과목 선택 드롭다운 표시
+                // Show subject selection dropdown
                 subjectDropdown.style.display = 'block';
 
-                // 과목 드롭다운 초기화
-                subjectSelect.textContent = '과목을 선택하세요';
+                // Reset subject dropdown
+                subjectSelect.textContent = 'Select Subject';
                 currentSubject = null;
                 ratingContent.style.display = 'none';
             }
         });
 
-        // 과목 드롭다운 토글
+        // Subject dropdown toggle
         subjectSelect.addEventListener('click', () => {
             const isVisible = subjectList.style.display === 'block';
             subjectList.style.display = isVisible ? 'none' : 'block';
             subjectSelect.classList.toggle('open', !isVisible);
 
-            // 다른 드롭다운 닫기
+            // Close other dropdown
             gradeList.style.display = 'none';
             gradeSelect.classList.remove('open');
         });
 
-        // 과목 선택
+        // Subject selection
         subjectList.addEventListener('click', (event) => {
             if (event.target.dataset.value) {
                 const selectedSubject = event.target.dataset.value;
@@ -210,7 +210,7 @@
                 subjectSelect.classList.remove('open');
                 ratingContent.style.display = 'flex';
 
-                // 폼 초기화
+                // Reset form
                 document.querySelector('.form-bottom').style.display = 'block';
                 document.querySelector('.submitted-message').style.display = 'none';
                 document.querySelector('#submit-loader').style.display = 'none';
@@ -221,11 +221,11 @@
                 });
 
                 editingCommentId = null;
-                submitButton.textContent = '제출하기';
+                submitButton.textContent = 'Submit';
             }
         });
 
-        // 드롭다운 외부 클릭 시 닫기
+        // Close dropdowns when clicking outside
         document.addEventListener('click', (event) => {
             if (!gradeSelect.contains(event.target) && !gradeList.contains(event.target)) {
                 gradeList.style.display = 'none';
@@ -237,7 +237,7 @@
             }
         });
 
-        // 별점 클릭
+        // Star rating click
         document.querySelectorAll('.stars').forEach(starsContainer => {
             starsContainer.addEventListener('click', (event) => {
                 if (event.target.classList.contains('star')) {
@@ -250,12 +250,12 @@
             });
         });
 
-        // 제출 버튼 클릭
+        // Submit button click
         submitButton.addEventListener('click', async () => {
             if (!currentUser) {
                 const user = await window.auth.getCurrentUser();
                 if (!user) {
-                    alert('로그인이 필요합니다');
+                    alert('Please log in');
                     window.location.href = 'login.html';
                     return;
                 }
@@ -263,12 +263,12 @@
             }
 
             if (!currentGrade) {
-                alert('학년을 먼저 선택해주세요');
+                alert('Please select a grade first');
                 return;
             }
 
             if (!currentSubject) {
-                alert('과목을 먼저 선택해주세요');
+                alert('Please select a subject first');
                 return;
             }
 
@@ -291,7 +291,7 @@
             const engagingLevel = getRating('engaging_level');
 
             if (difficulty === 0 || lectureStyle === 0 || engagingLevel === 0) {
-                alert('모든 항목에 별점을 매겨주세요');
+                alert('Please rate all items');
                 return;
             }
 
@@ -312,14 +312,14 @@
                 if (result.success) {
                     submittedMessage.style.display = 'block';
                 } else {
-                    console.error('저장 오류:', result.error);
-                    alert(result.error || '저장 실패');
+                    console.error('Save error:', result.error);
+                    alert(result.error || 'Save failed');
                     formBottom.style.display = 'block';
                 }
             } catch (error) {
-                console.error('제출 오류:', error);
+                console.error('Submit error:', error);
                 loader.style.display = 'none';
-                alert('네트워크 오류');
+                alert('Network error');
                 formBottom.style.display = 'block';
             }
         });

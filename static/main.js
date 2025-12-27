@@ -129,9 +129,9 @@ function setupMenu() {
 }
 
 // Load user comments
-// 사용자 댓글 로드 (전역 등록) - subjects.html에서는 동작하지 않음
+// Load user comments (globally registered) - does not work in subjects.html
 window.loadUserComments = async function loadUserComments() {
-    // subjects.html에서는 리뷰 목록을 표시하지 않음
+    // Does not display review list in subjects.html
     if (window.location.pathname.includes('subjects.html')) {
         return;
     }
@@ -150,30 +150,30 @@ window.loadUserComments = async function loadUserComments() {
     }
 }
 
-// Display comments in UI (reviews.html 전용)
-// subjects.html에서는 동작하지 않음
+// Display comments in UI (reviews.html only)
+// Does not work in subjects.html
 window.displayComments = function displayComments(comments) {
-    // subjects.html에서는 리뷰 목록을 표시하지 않음
+    // Does not display review list in subjects.html
     if (window.location.pathname.includes('subjects.html')) {
         return;
     }
     
-    // 기존 댓글 목록 컨테이너 찾기
+    // Find existing comment list container
     let commentsList = document.getElementById('comments-list');
     let commentsContainer = document.getElementById('comments-container');
     
-    // 컨테이너가 없으면 리턴 (동적 생성 제거)
+    // Return if container doesn't exist (removed dynamic creation)
     if (!commentsContainer || !commentsList) {
         return;
     }
 
-    // 댓글이 없는 경우
+    // No comments case
     if (!comments || comments.length === 0) {
-        commentsList.innerHTML = '<p class="no-comments">아직 작성한 리뷰가 없습니다.</p>';
+        commentsList.innerHTML = '<p class="no-comments">You haven\'t written any reviews yet.</p>';
         return;
     }
 
-    // 댓글 목록 렌더링
+    // Render comment list
     commentsList.innerHTML = '';
     
     comments.forEach(comment => {
@@ -182,27 +182,27 @@ window.displayComments = function displayComments(comments) {
         commentDiv.innerHTML = `
             <div class="comment-header">
                 <strong>${comment.subject}</strong>
-                <span class="comment-date">${new Date(comment.created_at).toLocaleDateString('ko-KR')}</span>
+                <span class="comment-date">${new Date(comment.created_at).toLocaleDateString('en-US')}</span>
             </div>
             <div class="comment-ratings">
-                <span>난이도: ${'★'.repeat(comment.difficulty)}${'☆'.repeat(5-comment.difficulty)}</span>
-                <span>강의 스타일: ${'★'.repeat(comment.lecture_style)}${'☆'.repeat(5-comment.lecture_style)}</span>
-                <span>흥미도: ${'★'.repeat(comment.engaging_level)}${'☆'.repeat(5-comment.engaging_level)}</span>
+                <span>Difficulty: ${'★'.repeat(comment.difficulty)}${'☆'.repeat(5-comment.difficulty)}</span>
+                <span>Lecture Style: ${'★'.repeat(comment.lecture_style)}${'☆'.repeat(5-comment.lecture_style)}</span>
+                <span>Engagement: ${'★'.repeat(comment.engaging_level)}${'☆'.repeat(5-comment.engaging_level)}</span>
             </div>
             <div class="comment-reason">${comment.reason}</div>
             <div class="comment-actions">
-                <button onclick="window.editComment('${comment.id}')" class="edit-btn">수정</button>
-                <button onclick="window.deleteComment('${comment.id}')" class="delete-btn">삭제</button>
+                <button onclick="window.editComment('${comment.id}')" class="edit-btn">Edit</button>
+                <button onclick="window.deleteComment('${comment.id}')" class="delete-btn">Delete</button>
             </div>
         `;
         commentsList.appendChild(commentDiv);
     });
     
-    console.log(`✅ ${comments.length}개의 리뷰가 표시됨`);
+    console.log(`✅ Displayed ${comments.length} reviews`);
 }
 
 // Edit comment function
-// 댓글 수정 함수 (전역 등록)
+// Edit comment function (globally registered)
 window.editComment = async function editComment(commentId) {
     if (!currentUser || !window.comments) return;
     
@@ -212,7 +212,7 @@ window.editComment = async function editComment(commentId) {
             const comment = result.data.find(c => c.id === commentId);
             
             if (comment) {
-                // 리뷰 작성 탭으로 이동
+                // Navigate to review writing tab
                 const writeTabBtn = document.querySelector('[data-tab="write-review"]');
                 if (writeTabBtn) {
                     writeTabBtn.click();
@@ -237,14 +237,13 @@ window.editComment = async function editComment(commentId) {
                 }
                 
                 // Show form and set editing state
-                // 폼 표시 및 수정 모드 설정
                 const ratingContent = document.querySelector('.rating-content');
                 const formBottom = document.querySelector('.form-bottom');
                 const submitButton = document.querySelector('.submit-button');
                 
                 if (ratingContent) ratingContent.style.display = 'flex';
                 if (formBottom) formBottom.style.display = 'block';
-                if (submitButton) submitButton.textContent = '수정하기';
+                if (submitButton) submitButton.textContent = 'Update';
                 
                 editingCommentId = commentId;
                 
@@ -256,13 +255,13 @@ window.editComment = async function editComment(commentId) {
             }
         }
     } catch (error) {
-        console.error('리뷰 수정 로드 실패:', error);
-        alert('리뷰를 불러오는데 실패했습니다.');
+        console.error('Failed to load review for editing:', error);
+        alert('Failed to load review.');
     }
 }
 
 // Set rating stars
-// 별점 설정 함수 (전역 등록)
+// Set rating stars function (globally registered)
 window.setRating = function setRating(type, rating) {
     const stars = document.querySelector(`[data-rating-type="${type}"]`);
     if (stars) {
@@ -274,15 +273,15 @@ window.setRating = function setRating(type, rating) {
 }
 
 // Delete comment function
-// 댓글 삭제 함수 (전역 등록)
+// Delete comment function (globally registered)
 window.deleteComment = async function deleteComment(commentId) {
     if (!currentUser || !window.comments) return;
     
-    if (confirm('이 리뷰를 삭제하시겠습니까?')) {
+    if (confirm('Are you sure you want to delete this review?')) {
         try {
             const result = await window.comments.delete(commentId);
             if (result.success) {
-                // 현재 활성화된 탭 새로고침
+                // Refresh currently active tab
                 const activeTab = document.querySelector('.tab-btn.active');
                 if (activeTab) {
                     const tabId = activeTab.dataset.tab;
@@ -292,24 +291,24 @@ window.deleteComment = async function deleteComment(commentId) {
                         window.loadMyReviews();
                     }
                 }
-                // 레거시 호환
+                // Legacy compatibility
                 if (window.loadUserComments) {
                     window.loadUserComments();
                 }
             } else {
-                alert(result.error || '삭제 실패. 다시 시도해주세요.');
+                alert(result.error || 'Delete failed. Please try again.');
             }
         } catch (error) {
-            console.error('삭제 오류:', error);
-            alert('네트워크 오류. 다시 시도해주세요.');
+            console.error('Delete error:', error);
+            alert('Network error. Please try again.');
         }
     }
 }
 
 // Logout function
-// 로그아웃 함수 (전역 등록)
+// Logout function (globally registered)
 window.logout = async function logout() {
-    if (confirm('로그아웃 하시겠습니까?')) {
+    if (confirm('Are you sure you want to log out?')) {
         if (window.auth) {
             const result = await window.auth.signOut();
             if (result.success) {
@@ -317,7 +316,7 @@ window.logout = async function logout() {
                 stopActivityTracking();
                 window.location.href = 'login.html';
             } else {
-                alert('로그아웃 실패. 다시 시도해주세요.');
+                alert('Logout failed. Please try again.');
             }
         }
     }
