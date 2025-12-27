@@ -117,7 +117,7 @@
     <script src="static/db.js"></script>
     <script src="static/main.js"></script>
     <script>
-        // Check login status
+        // Check login status and load edit review if needed
         document.addEventListener('DOMContentLoaded', async function() {
             await new Promise(resolve => setTimeout(resolve, 500));
             
@@ -142,7 +142,93 @@
                 window.location.href = 'login.html';
                 return;
             }
+
+            // Check if we're in edit mode
+            const editReviewId = sessionStorage.getItem('editReviewId');
+            if (editReviewId) {
+                // Clear the sessionStorage so it doesn't persist
+                sessionStorage.removeItem('editReviewId');
+                
+                // Load the review data
+                await loadReviewForEdit(editReviewId);
+            }
         });
+
+        // Load review data for editing
+        async function loadReviewForEdit(reviewId) {
+            try {
+                // Get all reviews and find the one we want to edit
+                const result = await window.comments.getAll();
+                if (result.success && result.data) {
+                    const review = result.data.find(r => r.id === reviewId);
+                    
+                    if (review) {
+                        // Set grade
+                        currentGrade = review.grade;
+                        if (currentGrade) {
+                            const gradeText = `Grade ${currentGrade}`;
+                            gradeSelect.textContent = gradeText;
+                            subjectDropdown.style.display = 'block';
+                        }
+                        
+                        // Set subject
+                        currentSubject = review.subject;
+                        // Find the subject label from the dropdown
+                        const subjectOptions = subjectList.querySelectorAll('div[data-value]');
+                        const subjectOption = Array.from(subjectOptions).find(
+                            opt => opt.dataset.value === review.subject
+                        );
+                        if (subjectOption) {
+                            subjectSelect.textContent = subjectOption.textContent;
+                        } else {
+                            subjectSelect.textContent = review.subject;
+                        }
+                        
+                        // Set ratings
+                        const difficultyStars = document.querySelector('[data-rating-type="difficulty"]').querySelectorAll('.star');
+                        const lectureStars = document.querySelector('[data-rating-type="lecture_style"]').querySelectorAll('.star');
+                        const engagingStars = document.querySelector('[data-rating-type="engaging_level"]').querySelectorAll('.star');
+                        
+                        difficultyStars.forEach((star, index) => {
+                            star.classList.toggle('active', index < review.difficulty);
+                        });
+                        lectureStars.forEach((star, index) => {
+                            star.classList.toggle('active', index < review.lecture_style);
+                        });
+                        engagingStars.forEach((star, index) => {
+                            star.classList.toggle('active', index < review.engaging_level);
+                        });
+                        
+                        // Set review text
+                        const textarea = document.querySelector('.reason-box textarea');
+                        if (textarea) {
+                            textarea.value = review.reason;
+                        }
+                        
+                        // Show the form
+                        ratingContent.style.display = 'flex';
+                        document.querySelector('.form-bottom').style.display = 'block';
+                        document.querySelector('.submitted-message').style.display = 'none';
+                        document.querySelector('#submit-loader').style.display = 'none';
+                        
+                        // Set editing state
+                        editingCommentId = reviewId;
+                        submitButton.textContent = 'Update';
+                        
+                        console.log('✅ Review loaded for editing:', reviewId);
+                    } else {
+                        console.error('Review not found:', reviewId);
+                        alert('Review not found');
+                    }
+                } else {
+                    console.error('Failed to load reviews:', result.error);
+                    alert('Failed to load review data');
+                }
+            } catch (error) {
+                console.error('Error loading review for edit:', error);
+                alert('Failed to load review');
+            }
+        }
 
         const gradeSelect = document.querySelector('.grade-select');
         const gradeList = document.querySelector('.grade-list');
