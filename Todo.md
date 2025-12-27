@@ -1,4 +1,3 @@
-- 학년별로 나눠야함(6,7,8)
 Announcement를 홈페이지 아래쪽에다가 
 [Announcement]
 informed decisions. To keep this community welcoming and respectful, we ask everyone to follow our guidelines when posting or commenting.

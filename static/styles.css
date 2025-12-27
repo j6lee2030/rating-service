@@ -1801,3 +1801,240 @@ body.with-subjects-bg .main-box {
 .grade-dropdown {
     margin-bottom: var(--spacing-md);
 }
+
+/* ========================================
+   Community Guidelines Section
+   ======================================== */
+
+.guidelines-section {
+    position: relative;
+    z-index: 1;
+    padding: 60px var(--spacing-lg);
+    background: linear-gradient(135deg, var(--bg-primary) 0%, #f8fafc 50%, var(--bg-secondary) 100%);
+    margin-top: 48px;
+}
+
+.guidelines-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.announcement-title {
+    font-size: 3rem;
+    font-weight: 800;
+    color: var(--primary-color);
+    text-align: center;
+    margin-bottom: 16px;
+    letter-spacing: -0.5px;
+}
+
+.guidelines-title {
+    font-size: 2.2rem;
+    font-weight: 700;
+    color: var(--primary-color);
+    text-align: center;
+    margin-bottom: 24px;
+    letter-spacing: -0.5px;
+}
+
+.guidelines-intro {
+    font-size: 1.2rem;
+    line-height: 1.8;
+    color: var(--text-secondary);
+    text-align: center;
+    margin-bottom: 48px;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+    font-weight: 400;
+}
+
+.guidelines-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 32px;
+    margin-bottom: 48px;
+}
+
+.guideline-card {
+    background: var(--bg-card);
+    padding: 32px;
+    border-radius: 16px;
+    box-shadow: var(--shadow-md);
+    border: 1px solid var(--border-color);
+    transition: all var(--transition-normal);
+    position: relative;
+    overflow: hidden;
+}
+
+.guideline-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--accent-color), var(--primary-light));
+}
+
+.guideline-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+    border-color: var(--accent-light);
+}
+
+.guideline-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.guideline-icon {
+    font-size: 2rem;
+    flex-shrink: 0;
+    background: var(--accent-light);
+    padding: 12px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.guideline-card h3 {
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: var(--primary-color);
+    margin: 0;
+    letter-spacing: -0.25px;
+}
+
+.guideline-card p {
+    font-size: 1.05rem;
+    line-height: 1.7;
+    color: var(--text-primary);
+    margin: 0;
+    font-weight: 400;
+}
+
+.guidelines-footer {
+    background: var(--bg-card);
+    padding: 32px;
+    border-radius: 16px;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border-color);
+    text-align: center;
+}
+
+.guidelines-footer p {
+    font-size: 1.1rem;
+    line-height: 1.8;
+    color: var(--text-secondary);
+    margin: 0;
+    font-weight: 500;
+    font-style: italic;
+}
+
+/* 반응형 - Community Guidelines */
+@media (max-width: 1024px) {
+    .guidelines-grid {
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 24px;
+    }
+
+    .announcement-title {
+        font-size: 2.5rem;
+    }
+
+    .guidelines-title {
+        font-size: 2rem;
+    }
+
+    .guidelines-intro {
+        font-size: 1.1rem;
+    }
+}
+
+@media (max-width: 768px) {
+    .guidelines-section {
+        padding: 48px var(--spacing-md);
+    }
+
+    .announcement-title {
+        font-size: 2.2rem;
+    }
+
+    .guidelines-title {
+        font-size: 1.8rem;
+        margin-bottom: 20px;
+    }
+
+    .guidelines-intro {
+        font-size: 1rem;
+        margin-bottom: 32px;
+    }
+
+    .guidelines-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+        margin-bottom: 32px;
+    }
+
+    .guideline-card {
+        padding: 24px;
+    }
+
+    .guideline-header {
+        gap: 12px;
+        margin-bottom: 16px;
+    }
+
+    .guideline-icon {
+        font-size: 1.5rem;
+        padding: 10px;
+    }
+
+    .guideline-card h3 {
+        font-size: 1.2rem;
+    }
+
+    .guideline-card p {
+        font-size: 1rem;
+    }
+
+    .guidelines-footer {
+        padding: 24px;
+    }
+
+    .guidelines-footer p {
+        font-size: 1rem;
+    }
+}
+
+@media (max-width: 480px) {
+    .guidelines-section {
+        padding: 32px var(--spacing-sm);
+    }
+
+    .announcement-title {
+        font-size: 1.8rem;
+    }
+
+    .guidelines-title {
+        font-size: 1.4rem;
+    }
+
+    .guideline-card {
+        padding: 20px;
+    }
+
+    .guideline-header {
+        flex-direction: column;
+        text-align: center;
+        gap: 8px;
+    }
+
+    .guideline-card h3 {
+        font-size: 1.1rem;
+    }
+}
