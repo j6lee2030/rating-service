@@ -51,3 +51,5 @@ rating-service/
 - Compatible with any web server or local file system
 
 https://chadwick.managebac.com/student/portfolio
+
+# 6,7,8 학년이 보는 카테고리로 분류
